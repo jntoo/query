@@ -1,10 +1,10 @@
 package com.jntoo.db.model;
 
-import java.util.HashMap;
+
+import java.util.LinkedHashMap;
 
 
-
-public class QMap<K,V> extends HashMap<K,V> {
+public class QMap<K,V> extends LinkedHashMap<K,V> {
 
     public String getString(Object key)
     {

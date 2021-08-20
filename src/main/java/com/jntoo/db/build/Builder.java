@@ -437,10 +437,16 @@ public class Builder {
      */
     public String parseTable(QueryWrapper query)
     {
-        String name = query.getName();
+        String name = query.getPrefix() + query.getName();
         ArrayList list = (ArrayList) query.getOption().get("table");
         if(list == null || list.size() == 0){
             return name+" "+ getOptionValue(query ,"alias");
+        }
+        if(!StringUtil.isNullOrEmpty(query.getPrefix()))
+        {
+            for (int i = 0; i < list.size(); i++) {
+                list.set(i , query.getPrefix()+list.get(i));
+            }
         }
         return StringUtil.join("," , list)+" ";
     }

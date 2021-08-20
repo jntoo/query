@@ -29,6 +29,7 @@ public class QueryWrapper<T> {
     protected String mName = "";
     protected HashMap mOption = null;
     protected String pk = "id";
+    protected String prefix = ""; // 设置表前缀
     protected HashMap mData = null;
     protected Builder builder = null;
     private static ConnectionConfig connectionConfig;
@@ -105,6 +106,10 @@ public class QueryWrapper<T> {
             }else{
                 setName(parseClassToName(cls));
             }
+            if(!StringUtil.isNullOrEmpty(table.prefix()))
+            {
+                prefix = table.prefix();
+            }
 
             Field[] fields = cls.getDeclaredFields();
             for (Field field : fields) {
@@ -141,12 +146,13 @@ public class QueryWrapper<T> {
                 throw new RuntimeException("not ConnectionConfig");
             }
         }
+
         mName = "";
         mOption = null;
         mOption = new HashMap();
         mData = new HashMap();
         builder = Builder.make(connectionConfig.getConn());
-
+        prefix = Configuration.getPrefix();
         if(tableFields == null)
         {
             tableFields = new HashMap();
@@ -666,6 +672,14 @@ public class QueryWrapper<T> {
         return fetch(rs);
     }
 
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
     /**
      * 生成统计计算语句
      * @param f
@@ -1019,9 +1033,9 @@ public class QueryWrapper<T> {
      * @param rs
      * @return
      */
-    public HashMap fetch(ResultSet rs)
+    public Map fetch(ResultSet rs)
     {
-        HashMap data = new HashMap();
+        QMap data = new QMap();
         if(rs == null)return null;
         try {
             if(rs.next()){

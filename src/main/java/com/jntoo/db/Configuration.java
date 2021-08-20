@@ -20,6 +20,7 @@ public class Configuration {
         queryConfig = new QueryConfig();
         defaultProperty.setProperty("jntoo.db.debug", "true");
         defaultProperty.setProperty("jntoo.db.connection", "com.jntoo.db.DefaultConnection");
+        defaultProperty.setProperty("jntoo.db.prefix", "");
 
         //读取自定义配置
         String t4jProps = "jntoodb.properties";
@@ -37,9 +38,11 @@ public class Configuration {
     {
         queryConfig.setDebug(getBoolean("jntoo.db.debug"));
         Object config = getPropertyClass("jntoo.db.connection");
+
         if(config instanceof ConnectionConfig){
             queryConfig.setConnectionConfig((ConnectionConfig) config);
         }
+        queryConfig.setPrefix(getProperty("jntoo.db.prefix"));
     }
 
 
@@ -47,7 +50,10 @@ public class Configuration {
     {
         return queryConfig.getConnectionConfig();
     }
-
+    static public String getPrefix()
+    {
+        return queryConfig.getPrefix();
+    }
 
     /**
      * 加载属性文件
