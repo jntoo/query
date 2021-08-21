@@ -171,27 +171,27 @@ DB.name("table").where("field1" , "like" ,"%data%").where("field2","eq",12).sele
 ##### `whereIn`  `whereInNot` `whereLike` `whereLikeNot` `whereBetween` `whereBetweenNot`
 
 #### order 排序 `(可写多个条件)`
-#####·····  order(String order) 设置排序字段
+##### ·····  order(String order) 设置排序字段
 ````
 DB.name("table").where("field",12).order("id desc").select();
 // select * from table where field=? order by id desc 条件 ?=12  自动写入绑定
 ````
 
-#####·····  order(String field ,String sort) 设置排序字段
+##### ·····  order(String field ,String sort) 设置排序字段
 
 ````
 DB.name("table").where("field",12).order("id","desc").select();
 // select * from table where field=? order by id desc 条件 ?=12  自动写入绑定
 ````
 
-#####·····  orderDesc(String field) 设置排序字段
+##### ·····  orderDesc(String field) 设置排序字段
 
 ````
 DB.name("table").where("field",12).orderDesc("id").select();
 // select * from table where field=? order by id desc 条件 ?=12  自动写入绑定
 ````
 
-#####·····  orderAsc(String field) 设置排序字段
+##### ·····  orderAsc(String field) 设置排序字段
 
 ````
 DB.name("table").where("field",12).orderAsc("id").select();
@@ -199,7 +199,7 @@ DB.name("table").where("field",12).orderAsc("id").select();
 ````
 
 #### limit 设置获取条数 兼容（mysql sqlserver）
-#####·····  limit(long size) 设置获取条数
+##### ·····  limit(long size) 设置获取条数
 ````
 DB.name("table").where("field",12).orderAsc("id").limit(10).select();
 // select * from table where field=? order by id Asc LIMIT ? 条件 ?1=12 ?2=10   自动写入绑定
@@ -212,9 +212,9 @@ DB.name("table").where("field",12).orderAsc("id").limit(0,20).select();
 ````
 
 #### join 数据库join链接操作
-#####····· joinLeft(String table , String condtion) 设置左链接
-#####····· joinRight(String table , String condtion) 设置右链接
-#####····· joinInner(String table , String condtion) 设置全链接
+##### ····· joinLeft(String table , String condtion) 设置左链接
+##### ····· joinRight(String table , String condtion) 设置右链接
+##### ····· joinInner(String table , String condtion) 设置全链接
 ````java
 DB.name("table1").alias("t1")
 .joinLeft("table2 t2" , "t1.id=t2.id")
