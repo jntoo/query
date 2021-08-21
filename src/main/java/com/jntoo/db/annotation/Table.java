@@ -9,4 +9,5 @@ import java.lang.annotation.*;
 public @interface Table {
     String value() default "";
     String prefix() default "";
+    boolean sysPrefix() default true;
 }

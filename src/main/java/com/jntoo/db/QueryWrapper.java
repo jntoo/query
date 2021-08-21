@@ -101,12 +101,18 @@ public class QueryWrapper<T> {
         {
             Class cls = instance.getClass();
             Table table = (Table) cls.getAnnotation(Table.class);
+
             if(table != null && !"".equals(table.value())){
                 setName(table.value());
             }else{
                 setName(parseClassToName(cls));
             }
-            if(!StringUtil.isNullOrEmpty(table.prefix()))
+
+            if(table!= null && !table.sysPrefix()){
+                prefix = ""; // 擦除表前缀
+            }
+
+            if(table!= null && !StringUtil.isNullOrEmpty(table.prefix()))
             {
                 prefix = table.prefix();
             }
@@ -787,7 +793,7 @@ public class QueryWrapper<T> {
      */
     public long delete(Object id)
     {
-        if(id instanceof List){
+        if(id instanceof Collection){
             where(getPk() ,"in", id);
         }else if(id instanceof String){
             String idObject = (String)id;
@@ -799,7 +805,6 @@ public class QueryWrapper<T> {
         }else{
             where(getPk() , id);
         }
-
         return delete();
     }
 
@@ -851,7 +856,7 @@ public class QueryWrapper<T> {
      * 根据当前条件获取数据集
      * @return
      */
-    public List<T> select()
+    public List select()
     {
         List<T> result = new ArrayList();
         if(m != null)
@@ -1619,11 +1624,10 @@ public class QueryWrapper<T> {
 
         QueryMap queryMap = new QueryMap(getName());
         queryMap.mOption.putAll(mOption);
-        List<QMap> list = queryMap.select();
-
+        List<Map> list = queryMap.select();
         Map result = new LinkedHashMap();
 
-        for (HashMap map:list){
+        for (Map map:list){
             result.put(map.get(key),map.get(field));
         }
         return result;

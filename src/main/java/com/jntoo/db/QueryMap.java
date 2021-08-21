@@ -1,8 +1,9 @@
 package com.jntoo.db;
 
-import com.jntoo.db.model.QMap;
 
-public class QueryMap extends QueryWrapper<QMap> {
+import java.util.Map;
+
+public class QueryMap extends QueryWrapper<Map> {
 
     public QueryMap(String name) {
         super(name);
