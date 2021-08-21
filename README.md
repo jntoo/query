@@ -17,7 +17,7 @@ DB.name(Pojo 实例)     设置实例，相关数据在查询时会以非null �
 
 ## CURD 操作
 ### `Select`查询
-#### where 操作
+#### where 操作 `(可写多个条件)`
 ###### where(自定义条件) 不限制where 条件写法 等同于SQL语句： where 自定义条件 如下：
 
 ````
@@ -25,8 +25,51 @@ DB.name("table").where("1=1 AND field='12'").select();
 select * from table WHERE 1=1 AND field='12'
 ````
 
-#### where(String field , Object)  等于条件 如：
+#### where(String field , Object value)  等于条件 如：
 ````
 DB.name("table").where("field",12).select();
-select * from table where field=?  条件 ?=12  自定写入绑定
+select * from table where field=?  条件 ?=12  自动写入绑定
 ````
+#### where(String field ,String exp, Object value)  等于条件 如：
+````
+field  字段名
+exp    条件符号  可写 =、!=、>、>=、<、<=、in、not in、between、not between、like、not like
+       其中 =、!=、 > 、>= 、< 、<= 可以使用
+          eq、neq、gt、egt、lt、elt 替换
+value  条件值
+
+DB.name("table").where("field1" , "like" ,"%data%").where("field2","eq",12).select();
+select * from table where field1 like ? field2=?  条件 ?1='%data%'  ?2=12  自动写入绑定
+````
+
+#### where 便捷方法
+###### `whereIn`  `whereInNot` `whereLike` `whereLikeNot` `whereBetween` `whereBetweenNot`
+
+#### order 排序 `(可写多个条件)`
+#####  order(String order) 设置排序字段
+````
+DB.name("table").where("field",12).order("id desc").select();
+select * from table where field=? order by id desc 条件 ?=12  自动写入绑定
+````
+
+#####  order(String field ,String sort) 设置排序字段
+
+````
+DB.name("table").where("field",12).order("id","desc").select();
+select * from table where field=? order by id desc 条件 ?=12  自动写入绑定
+````
+
+#####  orderDesc(String field) 设置排序字段
+
+````
+DB.name("table").where("field",12).orderDesc("id").select();
+select * from table where field=? order by id desc 条件 ?=12  自动写入绑定
+````
+
+#####  orderAsc(String field) 设置排序字段
+
+````
+DB.name("table").where("field",12).orderAsc("id").select();
+select * from table where field=? order by id desc 条件 ?=12  自动写入绑定
+````
+

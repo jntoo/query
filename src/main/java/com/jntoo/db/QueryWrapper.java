@@ -926,8 +926,6 @@ public class QueryWrapper<T> {
             Class<T> type = (Class<T>) superClass.getActualTypeArguments()[0];
             return getInstance(type);
         }
-
-
     }
 
     protected T getTemplate()
@@ -1170,6 +1168,40 @@ public class QueryWrapper<T> {
     }
 
     /**
+     * 设置 SQL 排序字段
+     * @param nOrder
+     * @return
+     */
+    public QueryWrapper<T> order(String nOrder , String sort)
+    {
+        getOptionArrayList("order").add(nOrder +" "+sort);
+        return this;
+    }
+
+    /**
+     * 设置 SQL 排序字段
+     * @param nOrder
+     * @return
+     */
+    public QueryWrapper<T> orderDesc(String nOrder)
+    {
+        getOptionArrayList("order").add(nOrder +" desc");
+        return this;
+    }
+
+    /**
+     * 设置 SQL 排序字段
+     * @param nOrder
+     * @return
+     */
+    public QueryWrapper<T> orderAsc(String nOrder)
+    {
+        getOptionArrayList("order").add(nOrder +" asc");
+        return this;
+    }
+
+
+    /**
      * 设置SQL语句使用全连接 会生成如下：INNER JOIN table t on cond 的形式
      * @param table
      * @param cond 条件
@@ -1321,11 +1353,32 @@ public class QueryWrapper<T> {
      * @param inArray
      * @return
      */
-
     public QueryWrapper<T> whereIn(String field , String inArray)
     {
         String[] arr = inArray.split(",");
         return where(field , "in" , arr);
+    }
+
+    /**
+     * 设置SQL条件 会自动写成 and field like inArray 这样的形式
+     * @param field
+     * @param inArray
+     * @return
+     */
+    public QueryWrapper<T> whereLike(String field , Object inArray)
+    {
+        return where(field , "like" , inArray);
+    }
+
+    /**
+     * 设置SQL条件 会自动写成 and field not like inArray 这样的形式
+     * @param field
+     * @param inArray
+     * @return
+     */
+    public QueryWrapper<T> whereLikeNot(String field , Object inArray)
+    {
+        return where(field , "not like" , inArray);
     }
 
     /**
@@ -1369,7 +1422,10 @@ public class QueryWrapper<T> {
      */
     public QueryWrapper<T> whereBetween(String field , String start , String end)
     {
-        return where(field , "between" , "'"+start+"' AND '"+end+"'");
+        List data = new ArrayList(2);
+        data.add(0 , start);
+        data.add(1 , end);
+        return where(field , "between" , data);
     }
 
     /**
