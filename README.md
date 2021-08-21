@@ -205,7 +205,7 @@ DB.name("table").where("field",12).orderAsc("id").limit(10).select();
 // select * from table where field=? order by id Asc LIMIT ? 条件 ?1=12 ?2=10   自动写入绑定
 ````
 
-#####·····  limit(long offset , long size) 设置从某位置开始获取多少条数据
+##### ·····  limit(long offset , long size) 设置从某位置开始获取多少条数据
 ````
 DB.name("table").where("field",12).orderAsc("id").limit(0,20).select();
 // select * from table where field=? order by id Asc LIMIT ?,? 条件 ?1=12 ?2=0 ?3=20   自动写入绑定
