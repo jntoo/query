@@ -11,8 +11,8 @@ public class StringUtil {
 
     /**
      * 判断字符串是否为null或者空字符串
-     * @param obj
-     * @return
+     * @param obj 对象
+     * @return 是否kong
      */
     public static boolean isNullOrEmpty( Object obj )
     {
@@ -22,13 +22,23 @@ public class StringUtil {
         return "".equals(obj);
     }
 
+    /**
+     * 将第一个字母变为大写
+     * @param str 字母
+     * @return 改变后得字符串
+     */
     public static String firstCharUpper(String str)
     {
         if(isNullOrEmpty(str))return str;
         return str.substring(0,1).toUpperCase()+str.substring(1);
     }
 
-    //驼峰转下划线
+    /**
+     * 驼峰转下划线
+     * @param param 值
+     * @param charType 是否大写写
+     * @return 当前值
+     */
     public static String camelToUnderline(String param, Integer charType) {
         if (param == null || "".equals(param.trim())) {
             return "";
@@ -49,7 +59,12 @@ public class StringUtil {
         return sb.toString();
     }
 
-    //下划线转驼峰
+
+    /**
+     * 下划线转驼峰
+     * @param param 值
+     * @return 转换后得值
+     */
     public static String underlineToCamel(String param) {
         if (param == null || "".equals(param.trim())) {
             return "";
@@ -79,9 +94,9 @@ public class StringUtil {
 
     /**
      * 将数组或者List 转化为 按des 隔开的字符串
-     * @param des
-     * @param list
-     * @return
+     * @param des 分割值
+     * @param list 列表
+     * @return 处理号得值
      */
     public static String join(String des , Object list){
         StringBuffer buffer = new StringBuffer();

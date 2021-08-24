@@ -4,6 +4,11 @@ package model;
 import com.jntoo.db.annotation.FieldType;
 import com.jntoo.db.annotation.Fields;
 import com.jntoo.db.annotation.Table;
+import com.jntoo.db.utils.TimerUtils;
+
+import java.sql.Timestamp;
+import java.util.Date;
+
 
 /**
  *  管理员模块的实体类
@@ -15,7 +20,10 @@ public class Admins {
     private Integer id;
     private String username;
     private String pwd;
-    private String addtime;
+    private Timestamp addtime;
+
+    @Fields(type = FieldType.JSON)
+    private Datas datas;
 
     public Integer getId() {
         return id;
@@ -40,11 +48,19 @@ public class Admins {
         this.pwd = pwd == null ? "" : pwd.trim();
     }
 
-    public String getAddtime() {
+    public Timestamp getAddtime() {
         return addtime;
     }
-    public void setAddtime(String addtime) {
-        this.addtime = addtime == null ? "" : addtime.trim();
+    public void setAddtime(Timestamp addtime) {
+        this.addtime = addtime;
+    }
+
+    public Datas getDatas() {
+        return datas;
+    }
+
+    public void setDatas(Datas datas) {
+        this.datas = datas;
     }
 
     @Override
@@ -53,7 +69,8 @@ public class Admins {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", pwd='" + pwd + '\'' +
-                ", addtime='" + addtime + '\'' +
+                ", addtime='" + TimerUtils.date("yyyy-MM-dd HH:mm:ss",addtime) + '\'' +
+                ", datas=" + datas +
                 '}';
     }
 }

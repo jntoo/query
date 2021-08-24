@@ -37,8 +37,8 @@ public class Builder {
 
     /**
      * 构建Builder ，也只能使用这个来生成,会自动判断当前连接的是sqlserver 还是 mysql
-     * @param connect
-     * @return
+     * @param connect 设置链接地址
+     * @return Builder
      */
     static public Builder make(Connection connect)
     {
@@ -56,7 +56,7 @@ public class Builder {
 
     /**
      * 获取尚未构建的查询语句，子类可以替换他
-     * @return
+     * @return String
      */
     protected String getSelectSql()
     {
@@ -66,8 +66,8 @@ public class Builder {
 
     /**
      * 构建查询语句
-     * @param query
-     * @return
+     * @param query QueryWrapper实例
+     * @return String
      */
     public String buildSelect(QueryWrapper query)
     {
@@ -99,9 +99,9 @@ public class Builder {
 
     /**
      * 构建ifnull 代码
-     * @param func
-     * @param str
-     * @return
+     * @param func 左侧字段是否为空字段
+     * @param str  为null 时使用该值
+     * @return String
      */
     public String parseIfNull(String func , String str)
     {
@@ -110,8 +110,8 @@ public class Builder {
 
     /**
      * 获取MAP 的所有键
-     * @param map
-     * @return
+     * @param map 从Map获取所有得keys
+     * @return List
      */
     protected ArrayList getHashMapKeys(Map map)
     {
@@ -126,14 +126,14 @@ public class Builder {
 
     /**
      * 构建插入语句
-     * @param query
-     * @param replace
-     * @return
+     * @param query QueryWrapper实例
+     * @param replace 是否使用替换
+     * @return String
      */
     public String buildInsert(QueryWrapper query , boolean replace)
     {
         bindData = new ArrayList();
-        HashMap data = query.getData();
+        Map data = query.getData();
         if(data.isEmpty()){
             return "";
         }
@@ -154,8 +154,8 @@ public class Builder {
 
     /**
      * 构建删除语句
-     * @param query
-     * @return
+     * @param query QueryWrapper实例
+     * @return String
      */
     public String buildDelete(QueryWrapper query)
     {
@@ -172,13 +172,13 @@ public class Builder {
 
     /**
      * 构建更新语句
-     * @param query
-     * @return
+     * @param query QueryWrapper实例
+     * @return String
      */
     public String buildUpdate( QueryWrapper query )
     {
         bindData = new ArrayList();
-        HashMap data = query.getData();
+        Map data = query.getData();
         if(data.isEmpty()){
             return "";
         }
@@ -204,8 +204,8 @@ public class Builder {
 
     /**
      * 根据字段类型获取对应的默认数据
-     * @param type
-     * @return
+     * @param type 字段得类型
+     * @return String
      */
     protected String getFieldDefault(String type)
     {
@@ -240,9 +240,9 @@ public class Builder {
 
     /**
      * 获取字段的值
-     * @param type
-     * @param value
-     * @return
+     * @param type 字段类型
+     * @param value 默认值为空时自动加入信息
+     * @return String
      */
     protected String getFieldValue(String type , String value)
     {
@@ -260,8 +260,8 @@ public class Builder {
 
     /**
      * 获取表字段信息
-     * @param name
-     * @return
+     * @param name 表名称
+     * @return String
      */
     protected String getTableFind(String name)
     {
@@ -270,10 +270,10 @@ public class Builder {
 
     /**
      * 解析data数据
-     * @param query
-     * @param data
-     * @param isInsert
-     * @return
+     * @param query QueryWrapper实例
+     * @param data  解析得Map数据
+     * @param isInsert 是否插入
+     * @return Map
      */
     protected Map parseData(QueryWrapper query , Map data , boolean isInsert)
     {
@@ -325,8 +325,8 @@ public class Builder {
 
     /**
      * 解析锁表
-     * @param query
-     * @return
+     * @param query QueryWrapper实例
+     * @return String
      */
     protected String parseLock(QueryWrapper query)
     {
@@ -339,8 +339,8 @@ public class Builder {
 
     /**
      * 解析获取的行数
-     * @param query
-     * @return
+     * @param query QueryWrapper实例
+     * @return String
      */
     protected String parseLimit(QueryWrapper query)
     {
@@ -363,8 +363,8 @@ public class Builder {
 
     /**
      * 解析字段
-     * @param query
-     * @return
+     * @param query QueryWrapper实例
+     * @return String
      */
     protected String parseField(QueryWrapper query)
     {
@@ -377,8 +377,8 @@ public class Builder {
 
     /**
      * 解析是否强制使用索引
-     * @param query
-     * @return
+     * @param query QueryWrapper实例
+     * @return String
      */
     protected String parseForce(QueryWrapper query)
     {
@@ -391,8 +391,8 @@ public class Builder {
 
     /**
      * 解析去重复
-     * @param query
-     * @return
+     * @param query QueryWrapper实例
+     * @return String
      */
     protected String parseDistinct(QueryWrapper query)
     {
@@ -404,8 +404,8 @@ public class Builder {
 
     /**
      * 解析Having
-     * @param query
-     * @return
+     * @param query QueryWrapper实例
+     * @return String
      */
     protected String parseHaving(QueryWrapper query)
     {
@@ -417,9 +417,9 @@ public class Builder {
 
     /**
      * 获取DaoModel的某个属性
-     * @param query
-     * @param key
-     * @return
+     * @param query QueryWrapper实例
+     * @param key  键值
+     * @return String
      */
     protected String getOptionValue(QueryWrapper query , String key)
     {
@@ -432,8 +432,8 @@ public class Builder {
 
     /**
      * 解析表
-     * @param query
-     * @return
+     * @param query QueryWrapper实例
+     * @return 返回解析后得表名称
      */
     public String parseTable(QueryWrapper query)
     {
@@ -453,8 +453,8 @@ public class Builder {
 
     /**
      * 解析json 连接
-     * @param query
-     * @return
+     * @param query QueryWrapper实例
+     * @return 解析后得数据
      */
     public String parseJoin(QueryWrapper query)
     {
@@ -467,8 +467,8 @@ public class Builder {
 
     /**
      * 解析分组
-     * @param query
-     * @return
+     * @param query QueryWrapper实例
+     * @return 解析后得分组信息
      */
     public String parseGroup(QueryWrapper query)
     {
@@ -483,8 +483,8 @@ public class Builder {
 
     /**
      * 解析排序
-     * @param query
-     * @return
+     * @param query QueryWrapper实例
+     * @return 解析得排序信息
      */
     public String parseOrder(QueryWrapper query)
     {
@@ -500,8 +500,8 @@ public class Builder {
 
     /**
      * 解析条件
-     * @param query
-     * @return
+     * @param query QueryWrapper实例
+     * @return 解析后得条件信息
      */
     public String parseWhere( QueryWrapper query )
     {
@@ -548,8 +548,8 @@ public class Builder {
 
     /**
      * 格式化字符串
-     * @param val
-     * @return
+     * @param val 字符串
+     * @return 加入了单引号得字符串
      */
 
     protected String formatString( String val)
@@ -559,10 +559,10 @@ public class Builder {
 
     /**
      * 解析条件子语句
-     * @param buffer
-     * @param key
-     * @param exp
-     * @param val
+     * @param buffer 字符串缓冲区
+     * @param key    字段名
+     * @param exp    条件类型
+     * @param val    条件值
      */
     protected void parseWhereItem(StringBuffer buffer , String key , String exp , Object val)
     {
@@ -614,8 +614,8 @@ public class Builder {
 
     /**
      * 解析条件为数组 或者 list 的时候
-     * @param val
-     * @return
+     * @param val 数组得信息
+     * @return 解析后得List 列表
      */
     protected List getParseWhereValueArray(Object val)
     {
@@ -676,7 +676,7 @@ public class Builder {
 
     /**
      * 当前DaoModel 是否为分页
-     * @return
+     * @return 是否是分页模式
      */
     public boolean isPage() {
         return isPage;
@@ -684,7 +684,7 @@ public class Builder {
 
     /**
      * 设置为分页
-     * @param page
+     * @param page 设置是否分页
      */
     public void setPage(boolean page) {
         isPage = page;

@@ -5,13 +5,13 @@ import java.sql.DriverManager;
 
 public class DefaultConnection implements ConnectionConfig {
     // 数据库名称
-    static private final String database = "javamvc08652gxstglxt";
+    static private String database = "javamvc08652gxstglxt";
     // 数据库账号
-    static private final String username = "root";
+    static private String username = "root";
     // 数据库密码
-    static private final String pwd = "root";
+    static private String pwd = "root";
     // 是否为 mysql8.0及以上、如果是则把 false 改成 true
-    static private final boolean isMysql8 = false;  // 是否为mysql8
+    static private boolean isMysql8 = false;  // 是否为mysql8
 
     public static Connection conn = null;
 
@@ -61,5 +61,22 @@ public class DefaultConnection implements ConnectionConfig {
 
     public static boolean isIsMysql8() {
         return isMysql8;
+    }
+
+
+    public static void setDatabase(String database) {
+        DefaultConnection.database = database;
+    }
+
+    public static void setUsername(String username) {
+        DefaultConnection.username = username;
+    }
+
+    public static void setPwd(String pwd) {
+        DefaultConnection.pwd = pwd;
+    }
+
+    public static void setIsMysql8(boolean isMysql8) {
+        DefaultConnection.isMysql8 = isMysql8;
     }
 }
