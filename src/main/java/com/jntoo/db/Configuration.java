@@ -7,6 +7,9 @@ import java.io.InputStream;
 import java.security.AccessControlException;
 import java.util.Properties;
 
+/**
+ * @author weixin4j
+ */
 public class Configuration {
     private static Properties defaultProperty;
     private static QueryConfig queryConfig;
@@ -28,7 +31,7 @@ public class Configuration {
                 || loadProperties(defaultProperty, Configuration.class.getResourceAsStream("/WEB-INF/" + t4jProps))
                 || loadProperties(defaultProperty, Configuration.class.getClassLoader().getResourceAsStream(t4jProps));
         if (!loaded) {
-            System.out.println("weixin4j:没有加载到weixin4j.properties属性文件!");
+            System.out.println("没有加载到"+t4jProps+"属性文件!");
         }
         setConfig();
     }
