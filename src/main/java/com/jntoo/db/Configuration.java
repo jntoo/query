@@ -45,7 +45,6 @@ public class Configuration {
         queryConfig.setPrefix(getProperty("jntoo.db.prefix"));
     }
 
-
     static public ConnectionConfig getConnectionConfig()
     {
         return queryConfig.getConnectionConfig();

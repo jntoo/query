@@ -12,10 +12,10 @@ public class Test {
         List<Admins> data = queryWrapper.where("id" , 1).select();
         System.out.println(data);
 
-        Admins admins = new Admins();
 
+        Admins admins = new Admins();
         admins.setUsername("username");
-        admins.setPwd("username");
+
         Datas datas = new Datas();
         admins.setDatas(datas);
         datas.setAbc("abcc");

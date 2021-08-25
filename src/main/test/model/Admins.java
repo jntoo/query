@@ -6,19 +6,25 @@ import com.jntoo.db.annotation.Fields;
 import com.jntoo.db.annotation.Table;
 import com.jntoo.db.utils.TimerUtils;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Map;
 
 
 /**
  *  管理员模块的实体类
  */
 @Table
-public class Admins {
+public class Admins implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Fields(type = FieldType.PK_AUTO)
     private Integer id;
     private String username;
+
+    @Fields(type = FieldType.DEFAULT , autoUpdate = "Pwd")
     private String pwd;
     private Timestamp addtime;
 
@@ -63,6 +69,10 @@ public class Admins {
         this.datas = datas;
     }
 
+    public String autoPwdUpdate(Map mData)
+    {
+        return "abccccc";
+    }
     @Override
     public String toString() {
         return "Admins{" +

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.jntoo</groupId>
     <artifactId>db-query</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <packaging>jar</packaging>
     <description>database source query</description>
@@ -40,12 +40,12 @@
             <version>1.2.49</version>
         </dependency>
 
-<!--        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.47</version>
-            <scope>runntime</scope>
-        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>mysql</groupId>-->
+<!--            <artifactId>mysql-connector-java</artifactId>-->
+<!--            <version>5.1.47</version>-->
+<!--            <scope>runntime</scope>-->
+<!--        </dependency>-->
     </dependencies>
 
 
@@ -116,17 +116,17 @@
             <!-- 【注】snapshotRepository 与 repository 中的 id 一定要与 setting.xml 中 server 的 id 保持一致！ -->
             <distributionManagement>
                 <!-- 以下是maven 仓库上传 -->
-<!--                <snapshotRepository>-->
-<!--                    <id>snapshot</id>-->
-<!--                    <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>-->
-<!--                </snapshotRepository>-->
-<!--                <repository>-->
-<!--                    <id>releases</id>-->
-<!--                    <url>https://s01.oss.sonatype.org/content/repositories/releases/</url>-->
-<!--                </repository>-->
+                <snapshotRepository>
+                    <id>snapshot</id>
+                    <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+                </snapshotRepository>
+                <repository>
+                    <id>releases</id>
+                    <url>https://s01.oss.sonatype.org/content/repositories/releases/</url>
+                </repository>
 
                 <!-- 以下是阿里云上传 -->
-                <repository>
+<!--                <repository>
                     <id>rdc-releases</id>
                     <name>User Project Release</name>
                     <url>https://packages.aliyun.com/maven/repository/2130996-release-AYEHun/</url>
@@ -136,7 +136,7 @@
                     <id>rdc-snapshots</id>
                     <name>User Project SNAPSHOTS</name>
                     <url>https://packages.aliyun.com/maven/repository/2130996-snapshot-ryJBes/</url>
-                </snapshotRepository>
+                </snapshotRepository>-->
 
             </distributionManagement>
         </profile>

@@ -11,6 +11,7 @@ import com.jntoo.db.model.TableModel;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Blob;
@@ -76,6 +77,11 @@ public class TableManageUtils {
         Class<ResultSet> resultSetClass = ResultSet.class;
 
         for (Field field : fields) {
+
+            if((field.getModifiers() & (Modifier.STATIC | Modifier.FINAL)) > 0){
+                continue;
+            }
+
             Fields annotation = field.getAnnotation(Fields.class);
             FieldInfoModel model = new FieldInfoModel();
             Class<? extends FieldInfoModel> modelClass = model.getClass();
@@ -142,18 +148,16 @@ public class TableManageUtils {
                         throw new RuntimeException("没有找到该类型： "+type);
                     }
                 }
-            } catch (NoSuchMethodException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
+                continue;
             }
 
             if(annotation != null && !StringUtil.isNullOrEmpty(annotation.autoUpdate()))
             {
                 try{
-                    Method method = tableModel.getClass().getMethod("auto"+StringUtil.firstCharUpper(fieldName)+"Update" , Map.class);
+                    String key = "auto"+StringUtil.firstCharUpper(fieldName)+"Update";
+                    Method method = table.getMethod(key , Map.class);
                     setFieldValue(modelClass.getDeclaredField("autoMethodUpdate") , model , method);
                     tableModel.autoUpdateField.add(fieldName);
                 }catch (Exception e){
@@ -170,7 +174,7 @@ public class TableManageUtils {
             if(annotation != null && !StringUtil.isNullOrEmpty(annotation.autoInsert()))
             {
                 try{
-                    Method method = tableModel.getClass().getMethod("auto"+StringUtil.firstCharUpper(field.getName())+"Insert" , Map.class);
+                    Method method = table.getMethod("auto"+StringUtil.firstCharUpper(field.getName())+"Insert" , Map.class);
                     setFieldValue(modelClass.getDeclaredField("autoMethodInsert") , model , method);
                     tableModel.autoInserField.add(fieldName);
                 }catch (Exception e){
