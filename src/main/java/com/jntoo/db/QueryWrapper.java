@@ -968,7 +968,13 @@ public class QueryWrapper<T> {
 
     protected T getInstance(Class<T> superClass) {
         try {
-            return superClass.newInstance();
+            if (Map.class.isAssignableFrom(superClass))
+            {
+                return (T)new QMap();
+            }else{
+                return superClass.newInstance();
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);

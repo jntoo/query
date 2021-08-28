@@ -30,22 +30,19 @@
         <url>https://gitee.com/jntoo/query/tree/master</url>
     </scm>
 
-
-
-
     <dependencies>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.49</version>
+            <version>1.2.78</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>mysql</groupId>-->
-<!--            <artifactId>mysql-connector-java</artifactId>-->
-<!--            <version>5.1.47</version>-->
-<!--            <scope>runntime</scope>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.25</version>
+            <scope>runntime</scope>
+        </dependency>
     </dependencies>
 
 
@@ -139,6 +136,7 @@
                 </snapshotRepository>-->
 
             </distributionManagement>
+
         </profile>
     </profiles>
 

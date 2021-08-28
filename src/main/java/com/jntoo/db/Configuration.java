@@ -31,7 +31,7 @@ public class Configuration {
                 || loadProperties(defaultProperty, Configuration.class.getResourceAsStream("/WEB-INF/" + t4jProps))
                 || loadProperties(defaultProperty, Configuration.class.getClassLoader().getResourceAsStream(t4jProps));
         if (!loaded) {
-            System.out.println("没有加载到"+t4jProps+"属性文件!");
+            //System.out.println("没有加载到"+t4jProps+"属性文件!");
         }
         setConfig();
     }

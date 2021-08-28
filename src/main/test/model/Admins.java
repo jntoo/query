@@ -18,18 +18,18 @@ import java.util.Map;
 @Table
 public class Admins implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    public static final long serialVersionUID = 1L;
 
     @Fields(type = FieldType.PK_AUTO)
-    private Integer id;
-    private String username;
+    public Integer id;
+    public String username;
 
     @Fields(type = FieldType.DEFAULT , autoUpdate = "Pwd")
-    private String pwd;
-    private Timestamp addtime;
+    public String pwd;
+    public Timestamp addtime;
 
     @Fields(type = FieldType.JSON)
-    private Datas datas;
+    public Datas datas;
 
     public Integer getId() {
         return id;

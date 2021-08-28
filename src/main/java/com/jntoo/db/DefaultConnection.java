@@ -11,7 +11,7 @@ public class DefaultConnection implements ConnectionConfig {
     // 数据库密码
     static private String pwd = "root";
     // 是否为 mysql8.0及以上、如果是则把 false 改成 true
-    static private boolean isMysql8 = false;  // 是否为mysql8
+    static private boolean isMysql8 = true;  // 是否为mysql8
 
     public static Connection conn = null;
 
