@@ -348,9 +348,9 @@ public class Builder {
         if(limit == null || limit.isEmpty()){
             return "";
         }
-        Object offset = limit.get("offset");
-        Object pagesize  = limit.get("limit");
-        if(offset == null){
+        Long offset = (Long)limit.get("offset");
+        Long pagesize  = (Long)limit.get("limit");
+        if( offset == null ){
             bindData(pagesize);
             //return " LIMIT "+pagesize+" ";
             return " LIMIT ? ";

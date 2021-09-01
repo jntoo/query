@@ -637,9 +637,13 @@ public class QueryWrapper<T> {
      * @param nLimit 获取得行数
      * @return 当前实例
      */
-    public QueryWrapper<T> limit(long nLimit) {
-        //getOptionHashMap("limit").put("limit" , String.valueOf(nLimit));
-        return limit(String.valueOf(nLimit));
+    public QueryWrapper<T> limit(String nLimit) {
+        if (nLimit.indexOf(",") != -1) {
+            String[] list = nLimit.split(",");
+            return limit(Convert.toLong(list[0]), Convert.toLong(list[1]));
+        }
+
+        return limit(Convert.toLong(nLimit));
     }
 
     /**
@@ -649,8 +653,8 @@ public class QueryWrapper<T> {
      * @param nLimit 获取行数
      * @return 当前实例
      */
-    public QueryWrapper<T> limit(long offset, long nLimit) {
-        return limit(String.valueOf(offset), String.valueOf(nLimit));
+    public QueryWrapper<T> limit(String offset, String nLimit) {
+        return limit(Convert.toLong(offset), Convert.toLong(nLimit));
     }
 
     /**
@@ -680,11 +684,7 @@ public class QueryWrapper<T> {
      * @param nLimit 行数
      * @return 当前实例
      */
-    public QueryWrapper<T> limit(String nLimit) {
-        if (nLimit.indexOf(",") != -1) {
-            String[] list = nLimit.split(",");
-            return limit(list[0], list[1]);
-        }
+    public QueryWrapper<T> limit(long nLimit) {
         getOptionHashMap("limit").put("limit", nLimit);
         return this;
     }
@@ -696,7 +696,7 @@ public class QueryWrapper<T> {
      * @param nLimit 获取行数
      * @return 当前实例
      */
-    public QueryWrapper<T> limit(String offset, String nLimit) {
+    public QueryWrapper<T> limit(long offset, long nLimit) {
         HashMap map = getOptionHashMap("limit");
         map.put("limit", nLimit);
         map.put("offset", offset);
@@ -1166,11 +1166,15 @@ public class QueryWrapper<T> {
             Object data = bindData.get(i);
             int index = i + 1;
             if (data instanceof Integer) {
-                statement.setInt(i + 1, (Integer) data);
+                statement.setInt(index, (Integer) data);
             } else if (data instanceof Float) {
                 statement.setFloat(index, (Float) data);
+            } else if (data instanceof Long) {
+                statement.setLong(index, (Long) data);
             } else if (data instanceof Double) {
                 statement.setDouble(index, (Double) data);
+            } else if(data instanceof String){
+                statement.setString(index , (String) data);
             } else {
                 statement.setObject(index, data);
             }

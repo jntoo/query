@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.jntoo</groupId>
     <artifactId>db-query</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.5</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <packaging>jar</packaging>
     <description>database source query</description>
@@ -37,12 +37,12 @@
             <version>1.2.78</version>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.25</version>
             <scope>runntime</scope>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
 
