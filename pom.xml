@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.jntoo</groupId>
     <artifactId>db-query</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.7</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <packaging>jar</packaging>
     <description>database source query</description>
