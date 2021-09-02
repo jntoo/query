@@ -1,3 +1,4 @@
+import com.jntoo.db.DefaultConnection;
 import com.jntoo.db.QueryWrapper;
 import model.Admins;
 import com.jntoo.db.utils.DB;
@@ -11,6 +12,9 @@ public class Test {
 
 
     public static void main(String[] args) {
+        DefaultConnection.setUsername("root");
+        DefaultConnection.setPwd("root");
+        DefaultConnection.setDatabase("javamvc08652gxstglxt");
 
         Field[] fields = AdminsOne.class.getDeclaredFields();
         QueryWrapper<Admins> queryWrapper = DB.name(Admins.class);

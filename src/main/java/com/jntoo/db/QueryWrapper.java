@@ -32,13 +32,12 @@ public class QueryWrapper<T> {
     protected String prefix = ""; // 设置表前缀
     protected HashMap mData = null;
     protected Builder builder = null;
-
     private static ConnectionConfig connectionConfig;
-
-
     private TableModel tableModel;
-
     protected T model;
+
+    protected Connection connection;
+
 
     public static ConnectionConfig getConnectionConfig() {
         return connectionConfig;
@@ -116,16 +115,33 @@ public class QueryWrapper<T> {
         if (connectionConfig == null) {
             throw new RuntimeException("not ConnectionConfig");
         }
+        if(connection != null){
+            closeConnection();
+        }
         model = null;
         mName = "";
         mOption = null;
         mOption = new HashMap();
         mData = new HashMap();
-        builder = Builder.make(connectionConfig.getConn());
+        connection = connectionConfig.getConn();
+        builder = Builder.make(connection);
         prefix = Configuration.getPrefix();
-
         return this;
     }
+
+    public Connection getConnection() {
+        if(connection == null){
+            connection = connectionConfig.getConn();
+        }
+        return connection;
+    }
+
+    public void closeConnection()
+    {
+        connectionConfig.closeConn(connection);
+        connection = null;
+    }
+
 
     /**
      * 设置一个字段自增
@@ -155,7 +171,6 @@ public class QueryWrapper<T> {
         ArrayList list = new ArrayList();
         list.add("dec");
         list.add(step);
-
 
         data(field, list);
         return this;
@@ -539,11 +554,14 @@ public class QueryWrapper<T> {
                     st.close();
                 } else if (os instanceof ResultSet) {
                     ((ResultSet) os).close();
+                }else if(os instanceof Connection){
+
                 }
             } catch (SQLException e) {
             }
         }
         resultSetList.clear();
+        closeConnection();
     }
 
     /**
@@ -723,7 +741,9 @@ public class QueryWrapper<T> {
         //limit(1);
         String sql = builder.buildSelect(this);
         ResultSet rs = query(sql);
-        return (T) fetchEntity(rs);
+        T data = fetchEntity(rs);
+        free();
+        return data;
     }
 
     /**
@@ -735,7 +755,8 @@ public class QueryWrapper<T> {
         //limit(1);
         String sql = builder.buildSelect(this);
         ResultSet rs = query(sql);
-        return fetch(rs);
+        Map data = fetch(rs);
+        return data;
     }
 
     public String getPrefix() {
@@ -935,6 +956,7 @@ public class QueryWrapper<T> {
         while (((data = fetchEntity(rs)) != null)) {
             result.add(data);
         }
+        free();
         return result;
     }
 
@@ -974,7 +996,6 @@ public class QueryWrapper<T> {
             }else{
                 return superClass.newInstance();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -1149,9 +1170,7 @@ public class QueryWrapper<T> {
             setBindData(statement, bindData);
             //Statement st = conn.createStatement();
             ResultSet rs = statement.executeQuery();
-
             DB.log(sql, bindData);
-
             resultSetList.add(rs);
             resultSetList.add(statement);
             return rs;
@@ -1519,7 +1538,7 @@ public class QueryWrapper<T> {
      * @return 获取数据库链接
      */
     public Connection getConn() {
-        return connectionConfig.getConn();
+        return getConnection();
     }
 
 
@@ -1544,9 +1563,9 @@ public class QueryWrapper<T> {
         PreparedStatement rs = null;
         ResultSet rsKey = null;
         int id = -1;
+        Connection conn = this.getConn();
         try {
             DB.log(sql, bindData);
-            Connection conn = this.getConn();
             rs = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             setBindData(rs, bindData);
             rs.executeUpdate();
@@ -1559,6 +1578,7 @@ public class QueryWrapper<T> {
             //e.printStackTrace();
         } finally {
             DB.release(rs, rsKey);
+            closeConnection();
         }
         return id;
     }
@@ -1583,8 +1603,8 @@ public class QueryWrapper<T> {
     public int executeUpdate(String sql, List bindData) {
         PreparedStatement rs = null;
         int id = -1;
+        Connection conn = this.getConn();
         try {
-            Connection conn = this.getConn();
             rs = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             setBindData(rs, bindData);
             id = rs.executeUpdate();
@@ -1593,6 +1613,7 @@ public class QueryWrapper<T> {
             DB.log(e, sql);
         } finally {
             DB.release(rs, null);
+            closeConnection();
         }
         return id;
     }

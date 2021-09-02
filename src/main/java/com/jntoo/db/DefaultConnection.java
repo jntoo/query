@@ -5,11 +5,11 @@ import java.sql.DriverManager;
 
 public class DefaultConnection implements ConnectionConfig {
     // 数据库名称
-    static private String database = "javamvc08652gxstglxt";
+    static private String database = "";
     // 数据库账号
-    static private String username = "root";
+    static private String username = "";
     // 数据库密码
-    static private String pwd = "root";
+    static private String pwd = "";
     // 是否为 mysql8.0及以上、如果是则把 false 改成 true
     static private boolean isMysql8 = true;  // 是否为mysql8
 
@@ -29,6 +29,10 @@ public class DefaultConnection implements ConnectionConfig {
         return conn;
     }
 
+    @Override
+    public void closeConn(Connection connection) {
+
+    }
 
     public static String getConnectString() {
         try {

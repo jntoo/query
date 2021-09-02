@@ -72,7 +72,6 @@ public class Builder {
     public String buildSelect(QueryWrapper query)
     {
         String sql = getSelectSql();
-        Connection conn = query.getConn();
         bindData = new ArrayList();
 
         return sql.replace("%DISTINCT%" , parseDistinct(query))
@@ -280,7 +279,8 @@ public class Builder {
         Map result = new LinkedHashMap();
         // 分析数据
         try {
-            Statement st = getConn().createStatement();
+            Connection connection = getConn();
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(getTableFind(parseTable(query)));
             ResultSetMetaData rsmd = rs.getMetaData();
             int len = rsmd.getColumnCount();
@@ -316,6 +316,8 @@ public class Builder {
                     }
                 }
             }
+            rs.close();
+            st.close();
         }catch (SQLException e){
             e.printStackTrace();
         }
