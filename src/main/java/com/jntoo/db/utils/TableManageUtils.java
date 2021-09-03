@@ -44,6 +44,7 @@ public class TableManageUtils {
         // 处理表信息
         TableModel tableModel = new TableModel();
         Table annTable = table.getAnnotation(Table.class);
+        tableModel.entity = table;
         if(annTable != null)
         {
             if( !StringUtil.isNullOrEmpty(annTable.value()) )
@@ -70,18 +71,16 @@ public class TableManageUtils {
         return tableModel;
     }
 
-    private static synchronized void handlerTableField( TableModel tableModel , Class<?> table)
+    private static void handlerTableField( TableModel tableModel , Class<?> table)
     {
         Field[] fields = table.getDeclaredFields();
 
         Class<ResultSet> resultSetClass = ResultSet.class;
 
         for (Field field : fields) {
-
             if((field.getModifiers() & (Modifier.STATIC | Modifier.FINAL)) > 0){
                 continue;
             }
-
             Fields annotation = field.getAnnotation(Fields.class);
             FieldInfoModel model = new FieldInfoModel();
             Class<? extends FieldInfoModel> modelClass = model.getClass();
@@ -107,7 +106,6 @@ public class TableManageUtils {
 
             Class<?> type = field.getType();
             try {
-
                 setFieldValue(modelClass.getDeclaredField("name") , model , zhenshiName);
                 setFieldValue(modelClass.getDeclaredField("field") , model , field);
                 setFieldValue(modelClass.getDeclaredField("annField") , model , annotation);
@@ -188,7 +186,6 @@ public class TableManageUtils {
                 }
             }
             tableModel.setFieldInfo(fieldName , model);
-
         }
     }
 

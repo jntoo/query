@@ -1,6 +1,8 @@
 package com.jntoo.db.build;
 
+import com.jntoo.db.Configuration;
 import com.jntoo.db.QueryWrapper;
+import com.jntoo.db.utils.DB;
 import com.jntoo.db.utils.StringUtil;
 
 import java.sql.*;
@@ -17,38 +19,31 @@ public class Builder {
 
     protected List<Object> bindData = new ArrayList();
 
-    protected Connection conn;
-    public Builder(Connection connect)
+
+    public Builder()
     {
-        this.conn = connect;
+
     }
 
-
-    public Connection getConn() {
-        return conn;
-    }
-
-    public void setConn(Connection conn) {
-        this.conn = conn;
-    }
 
     static protected Builder content = null;
 
 
     /**
      * 构建Builder ，也只能使用这个来生成,会自动判断当前连接的是sqlserver 还是 mysql
-     * @param connect 设置链接地址
      * @return Builder
      */
-    static public Builder make(Connection connect)
+    static public Builder make()
     {
         if(content == null){
+            Connection connect = Configuration.getConnectionConfig().getConn();
             String str = connect.toString();
             if(str.indexOf("com.mysql") != -1){
-                content = new Mysql(connect);
+                content = new Mysql();
             }else{
-                content = new SqlServer(connect);
+                content = new SqlServer();
             }
+            Configuration.getConnectionConfig().closeConn(connect);
         }
         return content;
     }
@@ -278,10 +273,13 @@ public class Builder {
     {
         Map result = new LinkedHashMap();
         // 分析数据
+        Connection connection = null;
+        Statement st = null;
+        ResultSet rs = null;
         try {
-            Connection connection = getConn();
-            Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery(getTableFind(parseTable(query)));
+            connection = Configuration.getConnectionConfig().getConn();
+            st = connection.createStatement();
+            rs = st.executeQuery(getTableFind(parseTable(query)));
             ResultSetMetaData rsmd = rs.getMetaData();
             int len = rsmd.getColumnCount();
 
@@ -320,6 +318,11 @@ public class Builder {
             st.close();
         }catch (SQLException e){
             e.printStackTrace();
+        }finally {
+            DB.release(st , rs);
+            if(connection != null){
+                Configuration.getConnectionConfig().closeConn(connection);
+            }
         }
         return result;
     }

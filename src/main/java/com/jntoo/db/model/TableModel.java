@@ -13,10 +13,10 @@ public class TableModel {
     public String prefix;
     // 主键字段
     public String pk = "id";
+    //
+    public Class<?> entity;
 
     public Map<String,FieldInfoModel> fieldInfo = new HashMap();
-
-
     public List<String> autoInsertTimeField = new ArrayList();
     public List<String> autoInserField = new ArrayList();
     public List<String> autoUpdateTimeField = new ArrayList();
@@ -54,5 +54,12 @@ public class TableModel {
 
     public void setFieldInfo(String field ,  FieldInfoModel fieldInfo) {
         this.fieldInfo.put(field , fieldInfo);
+    }
+
+    public Class<?> getEntity() {
+        return entity;
+    }
+    public void setEntity(Class<?> entity) {
+        this.entity = entity;
     }
 }

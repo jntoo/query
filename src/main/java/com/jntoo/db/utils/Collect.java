@@ -52,6 +52,7 @@ public class Collect<T> {
 
     /**
      * 判断是否有上一页
+     * @return 返回得URL地址
      */
     public boolean IsPrev()
     {
@@ -60,6 +61,7 @@ public class Collect<T> {
 
     /**
      * 获取上一页的Url
+     * @return 返回得URL地址
      */
     public String getPrevPage()
     {
@@ -71,6 +73,7 @@ public class Collect<T> {
 
     /**
      * 是否有下一页
+     * @return 是否下一页
      */
     public boolean IsNext()
     {
@@ -79,6 +82,7 @@ public class Collect<T> {
 
     /**
      * 获取下一页的URL 地址
+     * @return 返回得URL地址
      */
     public String getNextPage()
     {
@@ -90,6 +94,7 @@ public class Collect<T> {
 
     /**
      * 获取第一页URL
+     * @return 返回得URL地址
      */
     public String getFirstPage()
     {
@@ -98,6 +103,7 @@ public class Collect<T> {
 
     /**
      * 获取最后一页URL
+     * @return 返回得URL地址
      */
     public String getLastPage()
     {
@@ -162,6 +168,7 @@ public class Collect<T> {
     /**
      * 获取替换成功的页码
      * @param page 页码
+     * @return 返回得URL地址
      */
     protected String getUrlPath(long page)
     {

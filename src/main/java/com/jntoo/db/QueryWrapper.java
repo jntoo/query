@@ -32,23 +32,13 @@ public class QueryWrapper<T> {
     protected String prefix = ""; // 设置表前缀
     protected HashMap mData = null;
     protected Builder builder = null;
-    private static ConnectionConfig connectionConfig;
     private TableModel tableModel;
     protected T model;
 
-    protected Connection connection;
-
-
-    public static ConnectionConfig getConnectionConfig() {
-        return connectionConfig;
-    }
-
-    public static void setConnectionConfig(ConnectionConfig config) {
-        connectionConfig = config;
-    }
 
     public QueryWrapper() {
         reset();
+        model = getInstanceOfT();
         handlerClass();
     }
 
@@ -59,7 +49,7 @@ public class QueryWrapper<T> {
      */
     public QueryWrapper(String name) {
         reset();
-
+        model = (T)new HashMap();
         setName(name);
     }
 
@@ -111,35 +101,19 @@ public class QueryWrapper<T> {
      * @return 重置数据信息
      */
     protected QueryWrapper<T> reset() {
-        connectionConfig = Configuration.getConnectionConfig();
+        ConnectionConfig connectionConfig = Configuration.getConnectionConfig();
         if (connectionConfig == null) {
             throw new RuntimeException("not ConnectionConfig");
-        }
-        if(connection != null){
-            closeConnection();
         }
         model = null;
         mName = "";
         mOption = null;
         mOption = new HashMap();
         mData = new HashMap();
-        connection = connectionConfig.getConn();
-        builder = Builder.make(connection);
+
+        builder = Builder.make();
         prefix = Configuration.getPrefix();
         return this;
-    }
-
-    public Connection getConnection() {
-        if(connection == null){
-            connection = connectionConfig.getConn();
-        }
-        return connection;
-    }
-
-    public void closeConnection()
-    {
-        connectionConfig.closeConn(connection);
-        connection = null;
     }
 
 
@@ -538,14 +512,15 @@ public class QueryWrapper<T> {
      */
     protected void finalize() {
 
-        free();
+        //free();
     }
 
     /**
      * 释放资源
      */
-    public void free() {
+    /*public void free() {
         // 释放rs
+
         for (int i = 0; i < resultSetList.size(); i++) {
             Object os = resultSetList.get(i);
             try {
@@ -561,8 +536,7 @@ public class QueryWrapper<T> {
             }
         }
         resultSetList.clear();
-        closeConnection();
-    }
+    }*/
 
     /**
      * 设置表名称
@@ -740,10 +714,12 @@ public class QueryWrapper<T> {
     public T find() {
         //limit(1);
         String sql = builder.buildSelect(this);
-        ResultSet rs = query(sql);
+        return (T)DB.find(sql , model != null ? model.getClass() : Map.class , builder.getBindData().toArray());
+
+        /*ResultSet rs = query(sql);
         T data = fetchEntity(rs);
         free();
-        return data;
+        return data;*/
     }
 
     /**
@@ -754,9 +730,12 @@ public class QueryWrapper<T> {
     private Map findMap() {
         //limit(1);
         String sql = builder.buildSelect(this);
-        ResultSet rs = query(sql);
+        return DB.find(sql , builder.getBindData().toArray());
+
+        /*ResultSet rs = query(sql);
         Map data = fetch(rs);
-        return data;
+        free();
+        return data;*/
     }
 
     public String getPrefix() {
@@ -840,7 +819,7 @@ public class QueryWrapper<T> {
 
     /**
      * 根据字段名求数据行数
-     *
+     * @param field 字段名，可为null
      * @return 根据字段得某行数
      */
     public long count(String field) {
@@ -942,12 +921,15 @@ public class QueryWrapper<T> {
      * @return 列表行
      */
     public List select() {
-        List<T> result = new ArrayList();
+        //List<T> result = new ArrayList();
         if (model != null) {
             where(model);
         }
-
         String sql = builder.buildSelect(this);
+        return DB.select(sql , model != null ? model.getClass() : Map.class , builder.getBindData().toArray());
+
+/*
+
         ResultSet rs = query(sql);
         if (rs == null) {
             return result;
@@ -957,7 +939,7 @@ public class QueryWrapper<T> {
             result.add(data);
         }
         free();
-        return result;
+        return result;*/
     }
 
     private String getFieldName(Field field) {
@@ -1032,7 +1014,16 @@ public class QueryWrapper<T> {
         if (rs == null) {
             return null;
         }
+
         try {
+            Object o;
+            o = DB.fetchEntity(rs, tableModel);
+            return (T)o;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        /*try {
             if (rs.next()) {
                 Field[] fields = data.getClass().getDeclaredFields();
                 for (Field field : fields) {
@@ -1072,7 +1063,7 @@ public class QueryWrapper<T> {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        }*/
 
         return null;
     }
@@ -1106,7 +1097,14 @@ public class QueryWrapper<T> {
      * @return Map结果
      */
     public Map fetch(ResultSet rs) {
-        QMap data = new QMap();
+
+        try {
+            return DB.fetchMap(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+        /*QMap data = new QMap();
         if (rs == null) return null;
         try {
             if (rs.next()) {
@@ -1120,52 +1118,38 @@ public class QueryWrapper<T> {
                     }
                     data.put(name, value);
                 }
+
             } else {
                 return null;
             }
         } catch (SQLException sql) {
             sql.printStackTrace();
         }
-        return data;
+        return data;*/
     }
 
-    protected ArrayList resultSetList = new ArrayList();
+    /*protected ArrayList resultSetList = new ArrayList();*/
 
     /**
      * 查询sql 语句并返回ResultSet，这个不需要释放，系统在释放时会自动释放
      *
      * @param sql 查询得sql 语句
      * @return 结果集
-     */
+     *//*
     public ResultSet query(String sql) {
-
         return query(sql, builder.getBindData());
-        /*try {
-            Connection conn = this.getConn();
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            System.out.println(sql);
-            resultSetList.add(rs);
-            resultSetList.add(st);
-            return rs;
-        }catch (SQLException e){
-            DB.log(e , sql);
-        }
-        return null;*/
     }
 
-    /**
+    *//**
      * 查询sql 语句并返回ResultSet，这个不需要释放，系统在释放时会自动释放
      *
      * @param sql      sql 语句
      * @param bindData 绑定值
      * @return 结果集
-     */
+     *//*
     public ResultSet query(String sql, List<Object> bindData) {
         try {
-
-            Connection conn = this.getConn();
+            Connection conn = Configuration.getConnectionConfig().getConn();
             PreparedStatement statement = conn.prepareStatement(sql);
             setBindData(statement, bindData);
             //Statement st = conn.createStatement();
@@ -1198,7 +1182,7 @@ public class QueryWrapper<T> {
                 statement.setObject(index, data);
             }
         }
-    }
+    }*/
 
 
     /**
@@ -1533,55 +1517,15 @@ public class QueryWrapper<T> {
     }
 
     /**
-     * 获取connection 连接
-     *
-     * @return 获取数据库链接
-     */
-    public Connection getConn() {
-        return getConnection();
-    }
-
-
-    /**
      * 执行插入语句
      *
      * @param sql 执行插入语句
      * @return 主键自增得id
      */
-    public int executeInsert(String sql) {
-        return executeInsert(sql, builder.getBindData());
+    private int executeInsert(String sql) {
+        return DB.executeInsert(sql, builder.getBindData().toArray());
     }
 
-    /**
-     * 执行插入语句
-     *
-     * @param sql      执行插入语句
-     * @param bindData 绑定得值
-     * @return 当前实例
-     */
-    public int executeInsert(String sql, List bindData) {
-        PreparedStatement rs = null;
-        ResultSet rsKey = null;
-        int id = -1;
-        Connection conn = this.getConn();
-        try {
-            DB.log(sql, bindData);
-            rs = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            setBindData(rs, bindData);
-            rs.executeUpdate();
-            rsKey = rs.getGeneratedKeys();
-            rsKey.next();
-            id = rsKey.getInt(1);
-
-        } catch (SQLException e) {
-            DB.log(e, sql);
-            //e.printStackTrace();
-        } finally {
-            DB.release(rs, rsKey);
-            closeConnection();
-        }
-        return id;
-    }
 
     /**
      * 执行更新语句
@@ -1589,33 +1533,8 @@ public class QueryWrapper<T> {
      * @param sql 更新得sql
      * @return 更新行数
      */
-    public int executeUpdate(String sql) {
-        return executeUpdate(sql, builder.getBindData());
-    }
-
-    /**
-     * 执行更新语句
-     *
-     * @param sql      更新得sql
-     * @param bindData 绑定得值
-     * @return 更新行数
-     */
-    public int executeUpdate(String sql, List bindData) {
-        PreparedStatement rs = null;
-        int id = -1;
-        Connection conn = this.getConn();
-        try {
-            rs = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            setBindData(rs, bindData);
-            id = rs.executeUpdate();
-            DB.log(sql, bindData);
-        } catch (SQLException e) {
-            DB.log(e, sql);
-        } finally {
-            DB.release(rs, null);
-            closeConnection();
-        }
-        return id;
+    private int executeUpdate(String sql) {
+        return DB.executeUpdate(sql, builder.getBindData().toArray());
     }
 
 

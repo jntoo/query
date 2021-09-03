@@ -13,8 +13,8 @@ import java.util.HashMap;
 public class SqlServer extends Builder{
     //@Override
     protected String pageSql  = "SELECT T1.* FROM (SELECT build.*, ROW_NUMBER() OVER (%ORDER%) AS ROW_NUMBER FROM (SELECT %DISTINCT% %FIELD% FROM %TABLE%%JOIN%%WHERE%%GROUP%%HAVING%) AS build) AS T1 %LIMIT%";
-    public SqlServer(Connection connect) {
-        super(connect);
+    public SqlServer() {
+        super();
         //if(isPage()){
         //    selectSql = "SELECT T1.* FROM (SELECT build.*, ROW_NUMBER() OVER (%ORDER%) AS ROW_NUMBER FROM (SELECT %DISTINCT% %FIELD% FROM %TABLE%%JOIN%%WHERE%%GROUP%%HAVING%) AS build) AS T1 %LIMIT%";
         //}

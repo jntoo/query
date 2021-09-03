@@ -1,4 +1,5 @@
 import com.jntoo.db.DefaultConnection;
+import com.jntoo.db.QueryMap;
 import com.jntoo.db.QueryWrapper;
 import model.Admins;
 import com.jntoo.db.utils.DB;
@@ -16,16 +17,15 @@ public class Test {
         DefaultConnection.setPwd("root");
         DefaultConnection.setDatabase("javamvc08652gxstglxt");
 
-        Field[] fields = AdminsOne.class.getDeclaredFields();
         QueryWrapper<Admins> queryWrapper = DB.name(Admins.class);
-        List<Admins> data = queryWrapper.where("id" , 1).select();
+        List<Admins> data = queryWrapper.where("id" , 1).limit(2).select();
         System.out.println(data);
 
         List adminsList = DB.name("admins").limit(0,20).select();
 
         System.out.println(adminsList);
+        DB.name("admins").count();
     }
-
 
     public static void isInt( Object data)
     {

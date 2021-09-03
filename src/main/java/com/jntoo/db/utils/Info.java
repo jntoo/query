@@ -5,6 +5,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jntoo.db.QueryMap;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -111,7 +116,7 @@ public class Info {
      * @param table 表名
      * @param pid   父级字段
      * @param value 获取的所有子集
-     * @return
+     * @return 获取所有得字符串
      */
     public static List getAllChild( String table , String pid , Object value , List templists)
     {
@@ -225,7 +230,10 @@ public class Info {
     }
 
     /**
-     * 比较时间大小
+     * 比较两个日期时间大小
+     * @param DATE1 日期1
+     * @param DATE2 日期2
+     * @return 日期1 - 日期2
      */
     public static long compare_datetime(String DATE1, String DATE2) {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -299,6 +307,47 @@ public class Info {
             return li[0];
         }
         return str;
+    }
+
+
+    /**
+     * 写入默认值
+     * @param data 实体类对象值
+     */
+    public static void handlerNullEntity(Object data)
+    {
+        Field[] fields = data.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            String methodName = field.getName();
+            field.setAccessible(true);
+            try {
+                Object val = field.get(data);
+                if(val == null){
+                    Class<?> type = field.getType();
+                    if( type.isAssignableFrom(Long.class)
+                            || type.isAssignableFrom(Integer.class)
+                            || type.isAssignableFrom(Double.class)
+                            || type.isAssignableFrom(Float.class)
+                            || type.isAssignableFrom(BigDecimal.class)
+                            || type.isAssignableFrom(BigInteger.class)
+                    ){
+                        Method method = type.getMethod("valueOf" , String.class);
+                        Object res = method.invoke(null , "0");
+                        field.set(data , res);
+                    }else if(methodName.equals("addtime")){
+                        field.set(data , TimerUtils.getDateStr());
+                    }else if(type.isAssignableFrom(String.class)){
+                        field.set(data , "");
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
