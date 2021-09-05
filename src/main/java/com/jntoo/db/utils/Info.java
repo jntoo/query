@@ -338,6 +338,9 @@ public class Info {
                         field.set(data , TimerUtils.getDateStr());
                     }else if(type.isAssignableFrom(String.class)){
                         field.set(data , "");
+                    }else {
+                        Object res = type.newInstance();
+                        field.set(data , res);
                     }
                 }
             } catch (IllegalAccessException e) {
@@ -345,6 +348,8 @@ public class Info {
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
                 e.printStackTrace();
             }
         }

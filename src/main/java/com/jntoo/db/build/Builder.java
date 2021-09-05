@@ -353,8 +353,8 @@ public class Builder {
         if(limit == null || limit.isEmpty()){
             return "";
         }
-        Long offset = (Long)limit.get("offset");
-        Long pagesize  = (Long)limit.get("limit");
+        Number offset = (Number)limit.get("offset");
+        Number pagesize  = (Number)limit.get("limit");
         if( offset == null ){
             bindData(pagesize);
             //return " LIMIT "+pagesize+" ";

@@ -27,10 +27,10 @@ import java.util.Date;
  */
 public class QueryWrapper<T> {
     protected String mName = "";
-    protected HashMap mOption = null;
+    protected Map mOption = null;
     protected String pk = "id";
     protected String prefix = ""; // 设置表前缀
-    protected HashMap mData = null;
+    protected Map mData = null;
     protected Builder builder = null;
     private TableModel tableModel;
     protected T model;
@@ -316,12 +316,13 @@ public class QueryWrapper<T> {
                 }
             }
         }
-
     }
 
     private void handlerAutoField(List<String> autoFields) {
         if (autoFields.size() > 0) {
-            Map clone = (Map) mData.clone();
+            Map clone = new HashMap();
+            clone.putAll(mData);
+
             for (String s : autoFields) {
                 FieldInfoModel fieldInfo = tableModel.getFieldInfo(s);
                 if (fieldInfo.getAutoMethodUpdate() != null) {
@@ -1635,7 +1636,7 @@ public class QueryWrapper<T> {
     public List<String> getCol(String field) {
         return column(field);
     }
-
+    
 
     /**
      * 根据当前条件获取列数据,健对值的关系
@@ -1649,4 +1650,7 @@ public class QueryWrapper<T> {
     }
 
 
+    public void setmOption(Map mOption) {
+        this.mOption = mOption;
+    }
 }
