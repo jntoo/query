@@ -11,23 +11,17 @@ import java.util.*;
 import java.util.Date;
 
 public class Builder {
-    protected String selectSql = "SELECT%DISTINCT% %FIELD% FROM %TABLE%%FORCE%%JOIN%%WHERE%%GROUP%%HAVING%%ORDER%%LIMIT% %LOCK%";
-    protected String updateSql = "UPDATE %TABLE% SET %SET%%JOIN%%WHERE% %LOCK%";
-    protected String insertSql = "%INSERT% INTO %TABLE% (%FIELD%) VALUES (%DATA%)";
-    protected String deleteSql = "DELETE FROM %TABLE%%JOIN%%WHERE%%ORDER%%LIMIT% %LOCK%";
+    static final protected String selectSql = "SELECT%DISTINCT% %FIELD% FROM %TABLE%%FORCE%%JOIN%%WHERE%%GROUP%%HAVING%%ORDER%%LIMIT% %LOCK%";
+    static final protected String updateSql = "UPDATE %TABLE% SET %SET%%JOIN%%WHERE% %LOCK%";
+    static final protected String insertSql = "%INSERT% INTO %TABLE% (%FIELD%) VALUES (%DATA%)";
+    static final protected String deleteSql = "DELETE FROM %TABLE%%JOIN%%WHERE%%ORDER%%LIMIT% %LOCK%";
     private boolean isPage = false;
-
     protected List<Object> bindData = new ArrayList();
-
 
     public Builder()
     {
 
     }
-
-
-    static protected Builder content = null;
-
 
     /**
      * 构建Builder ，也只能使用这个来生成,会自动判断当前连接的是sqlserver 还是 mysql
@@ -35,19 +29,8 @@ public class Builder {
      */
     static public Builder make()
     {
-        if(content == null){
-            Connection connect = Configuration.getConnectionConfig().getConn();
-            String str = connect.toString();
-            if(str.indexOf("com.mysql") != -1){
-                content = new Mysql();
-            }else{
-                content = new SqlServer();
-            }
-            Configuration.getConnectionConfig().closeConn(connect);
-        }
-        return content;
+        return Configuration.getBuilder();
     }
-
 
     /**
      * 获取尚未构建的查询语句，子类可以替换他
@@ -67,8 +50,6 @@ public class Builder {
     public String buildSelect(QueryWrapper query)
     {
         String sql = getSelectSql();
-        bindData = new ArrayList();
-
         return sql.replace("%DISTINCT%" , parseDistinct(query))
                 .replace("%FIELD%" , parseField(query))
                 .replace("%TABLE%" , parseTable(query))
@@ -107,7 +88,7 @@ public class Builder {
      * @param map 从Map获取所有得keys
      * @return List
      */
-    protected ArrayList getHashMapKeys(Map map)
+    protected List getHashMapKeys(Map map)
     {
         Set keys = map.keySet();
         ArrayList result = new ArrayList();
@@ -126,7 +107,7 @@ public class Builder {
      */
     public String buildInsert(QueryWrapper query , boolean replace)
     {
-        bindData = new ArrayList();
+
         Map data = query.getData();
         if(data.isEmpty()){
             return "";
@@ -135,7 +116,7 @@ public class Builder {
         // 没数据不允许插入
         Map formatData = parseData(query,data,true);
         // 经过格式化的数据
-        ArrayList fields = getHashMapKeys(formatData);
+        List fields = getHashMapKeys(formatData);
         Collection values = formatData.values();
 
         //insertSql = "%INSERT% INTO %TABLE% (%FIELD%) VALUES (%DATA%)";
@@ -154,7 +135,7 @@ public class Builder {
     public String buildDelete(QueryWrapper query)
     {
         //protected String deleteSql = "DELETE FROM %TABLE%%JOIN%%WHERE%%ORDER%%LIMIT% %LOCK%";
-        bindData = new ArrayList();
+
         return deleteSql.replace("%TABLE%" , parseTable(query))
                 .replace("%JOIN%" , parseJoin(query))
                 .replace("%WHERE%" , parseWhere(query))
@@ -171,7 +152,7 @@ public class Builder {
      */
     public String buildUpdate( QueryWrapper query )
     {
-        bindData = new ArrayList();
+
         Map data = query.getData();
         if(data.isEmpty()){
             return "";
@@ -349,12 +330,12 @@ public class Builder {
      */
     protected String parseLimit(QueryWrapper query)
     {
-        HashMap limit = (HashMap) query.getOption().get("limit");
+        Map limit = (Map) query.getOption().get("limit");
         if(limit == null || limit.isEmpty()){
             return "";
         }
-        Number offset = (Number)limit.get("offset");
-        Number pagesize  = (Number)limit.get("limit");
+        Object offset = limit.get("offset");
+        Object pagesize  = limit.get("limit");
         if( offset == null ){
             bindData(pagesize);
             //return " LIMIT "+pagesize+" ";
@@ -373,7 +354,7 @@ public class Builder {
      */
     protected String parseField(QueryWrapper query)
     {
-        ArrayList list = (ArrayList) query.getOption().get("field");
+        List list = (List) query.getOption().get("field");
         if(list == null || list.size() == 0){
             return "*";
         }
@@ -387,7 +368,7 @@ public class Builder {
      */
     protected String parseForce(QueryWrapper query)
     {
-        ArrayList list = (ArrayList) query.getOption().get("force");
+        List list = (List) query.getOption().get("force");
         if(list == null || list.size() == 0){
             return "";
         }
@@ -443,7 +424,7 @@ public class Builder {
     public String parseTable(QueryWrapper query)
     {
         String name = query.getPrefix() + query.getName();
-        ArrayList list = (ArrayList) query.getOption().get("table");
+        List list = (List) query.getOption().get("table");
         if(list == null || list.size() == 0){
             return name+" "+ getOptionValue(query ,"alias");
         }
@@ -463,7 +444,7 @@ public class Builder {
      */
     public String parseJoin(QueryWrapper query)
     {
-        ArrayList list = (ArrayList) query.getOption().get("join");
+        List list = (List) query.getOption().get("join");
         if(list == null || list.size() == 0){
             return "";
         }
@@ -477,7 +458,7 @@ public class Builder {
      */
     public String parseGroup(QueryWrapper query)
     {
-        ArrayList orderList = (ArrayList) query.getOption().get("group");
+        List orderList = (List) query.getOption().get("group");
         if(orderList == null || orderList.size() == 0){
             return "";
         }
@@ -493,7 +474,7 @@ public class Builder {
      */
     public String parseOrder(QueryWrapper query)
     {
-        ArrayList orderList = (ArrayList) query.getOption().get("order");
+        List orderList = (List) query.getOption().get("order");
         if(orderList == null || orderList.size() == 0){
             return "";
         }
@@ -510,7 +491,7 @@ public class Builder {
      */
     public String parseWhere( QueryWrapper query )
     {
-        ArrayList whereList = (ArrayList) query.getOption().get("where");
+        List whereList = (List) query.getOption().get("where");
         if(whereList == null || whereList.size() == 0){
             return "";
         }
@@ -518,7 +499,7 @@ public class Builder {
 
         for(int i=0;i<whereList.size();i++)
         {
-            HashMap map = (HashMap) whereList.get(i);
+            Map map = (Map) whereList.get(i);
             if(i!=0){
                 // 每一个的连接符
                 buffer.append(" ");
@@ -591,7 +572,8 @@ public class Builder {
                 if(i>0){
                     buffer.append(",");
                 }
-                sd.add("?");
+
+                buffer.append("?");
                 i++;
             }
             buffer.append(")");
@@ -624,7 +606,9 @@ public class Builder {
      */
     protected List getParseWhereValueArray(Object val)
     {
-        ArrayList inArrayList = new ArrayList();
+        List inArrayList = new ArrayList();
+
+
         if(val instanceof List){
             return (List) val;
         }else if(val instanceof String || val instanceof String[]){

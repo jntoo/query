@@ -34,7 +34,7 @@ public class QueryWrapper<T> {
     protected Builder builder = null;
     private TableModel tableModel;
     protected T model;
-
+    protected List bindData = null;
 
     public QueryWrapper() {
         reset();
@@ -113,9 +113,19 @@ public class QueryWrapper<T> {
 
         builder = Builder.make();
         prefix = Configuration.getPrefix();
+        bindData = new ArrayList();
         return this;
     }
 
+    public void addBindData(Object data)
+    {
+        bindData.add(data);
+    }
+
+    public List getBindData()
+    {
+        return bindData;
+    }
 
     /**
      * 设置一个字段自增

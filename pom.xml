@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.jntoo</groupId>
     <artifactId>db-query</artifactId>
-    <version>1.0.15</version>
+    <version>1.0.17.sec2</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <packaging>jar</packaging>
     <description>database source query</description>
@@ -37,11 +37,12 @@
             <version>1.2.78</version>
         </dependency>
 
-        <!--<dependency>
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.25</version>
-        </dependency>-->
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 
@@ -112,17 +113,17 @@
             <!-- 【注】snapshotRepository 与 repository 中的 id 一定要与 setting.xml 中 server 的 id 保持一致！ -->
             <distributionManagement>
                 <!-- 以下是maven 仓库上传 -->
-                <snapshotRepository>
+                <!--<snapshotRepository>
                     <id>snapshot</id>
                     <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
                 </snapshotRepository>
                 <repository>
                     <id>releases</id>
                     <url>https://s01.oss.sonatype.org/content/repositories/releases/</url>
-                </repository>
+                </repository>-->
 
                 <!-- 以下是阿里云上传 -->
-                <!--<repository>
+                <repository>
                     <id>rdc-releases</id>
                     <name>User Project Release</name>
                     <url>https://packages.aliyun.com/maven/repository/2130996-release-AYEHun/</url>
@@ -132,7 +133,7 @@
                     <id>rdc-snapshots</id>
                     <name>User Project SNAPSHOTS</name>
                     <url>https://packages.aliyun.com/maven/repository/2130996-snapshot-ryJBes/</url>
-                </snapshotRepository>-->
+                </snapshotRepository>
 
             </distributionManagement>
 

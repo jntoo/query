@@ -110,7 +110,7 @@ public class DB {
             id = rs.executeUpdate();
             log(sql, bindData);
         } catch (SQLException e) {
-            log(e, sql);
+            log(e, sql,bindData);
         } finally {
             DB.release(rs, null);
             Configuration.getConnectionConfig().closeConn(conn);
@@ -140,7 +140,7 @@ public class DB {
             id = rsKey.getInt(1);
             DB.log(sql, bindData);
         } catch (SQLException e) {
-            DB.log(e, sql);
+            DB.log(e, sql,bindData);
         } finally {
             DB.release(rs, rsKey);
             Configuration.getConnectionConfig().closeConn(conn);
@@ -170,7 +170,7 @@ public class DB {
             data = fetchEntity(rs, cls);
             log(sql , binds);
         } catch (SQLException e) {
-            log(e , sql);
+            log(e , sql,binds);
             e.printStackTrace();
         } finally {
             release(statement , rs);
@@ -204,7 +204,7 @@ public class DB {
             log(sql , binds);
         } catch (SQLException e) {
             e.printStackTrace();
-            log(e , sql);
+            log(e , sql,binds);
         } finally {
             release(statement , rs);
             Configuration.getConnectionConfig().closeConn(conn);
@@ -288,12 +288,22 @@ public class DB {
      * @param e   错误信息
      * @param sql 附带得sql 语句
      */
-    static public void log(SQLException e, String sql) {
+    static public void log(SQLException e, String sql , Object[] data) {
         int code = e.getErrorCode();
         String message = e.getMessage();
-        String errorMessage = String.format("SQL execute Error Code: %d sql: \n%s\nMessage:%s", code, sql, message);
+
+        String errorMessage = String.format("SQL execute Error Code: %d data Count: %d sql: \n%s\nMessage:%s", code, data.length ,  sql, message);
+
+        if(data.length > 0){
+            errorMessage += "\n";
+            for (int i = 0; i < data.length; i++) {
+                errorMessage += "---?"+i+"="+data[i];
+            }
+        }
         System.err.println(errorMessage);
     }
+
+
 
     public static <T> T fetchEntity(ResultSet rs, Class<T> table) throws SQLException {
         if (Map.class.isAssignableFrom(table)) {

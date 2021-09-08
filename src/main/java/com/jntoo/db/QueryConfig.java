@@ -1,5 +1,7 @@
 package com.jntoo.db;
 
+import com.jntoo.db.build.Builder;
+
 public class QueryConfig {
     /**
      * 调试输出
@@ -15,6 +17,10 @@ public class QueryConfig {
      * 表前缀
      */
     private String prefix;
+
+
+    private Class<? extends Builder> builder;
+
 
     public boolean isDebug() {
         return isDebug;
@@ -38,5 +44,13 @@ public class QueryConfig {
 
     public void setPrefix(String prefix) {
         this.prefix = prefix;
+    }
+
+    public Class<? extends Builder> getBuilder() {
+        return builder;
+    }
+
+    public void setBuilder(Class<? extends Builder> builder) {
+        this.builder = builder;
     }
 }
