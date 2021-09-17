@@ -1,8 +1,8 @@
 node_modules
 /target
 jntoo-query.iml
-QueryWrapper.java
-QueryWrapperBase.java
+/QueryWrapper.java
+/QueryWrapperBase.java
 
 # Editor directories and files
 .idea
