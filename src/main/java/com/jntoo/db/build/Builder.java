@@ -1,7 +1,8 @@
 package com.jntoo.db.build;
 
 import com.jntoo.db.Configuration;
-import com.jntoo.db.QueryWrapper;
+import com.jntoo.db.QueryWrapperBase;
+import com.jntoo.db.model.WhereModel;
 import com.jntoo.db.utils.DB;
 import com.jntoo.db.utils.StringUtil;
 
@@ -17,19 +18,30 @@ public class Builder {
     static final protected String deleteSql = "DELETE FROM %TABLE%%JOIN%%WHERE%%ORDER%%LIMIT% %LOCK%";
     private boolean isPage = false;
     protected List<Object> bindData = new ArrayList();
-
+    protected QueryWrapperBase query;
     public Builder()
     {
 
+    }
+
+
+    public QueryWrapperBase getQuery() {
+        return query;
+    }
+
+    public void setQuery(QueryWrapperBase query) {
+        this.query = query;
     }
 
     /**
      * 构建Builder ，也只能使用这个来生成,会自动判断当前连接的是sqlserver 还是 mysql
      * @return Builder
      */
-    static public Builder make()
+    static public Builder make(QueryWrapperBase query)
     {
-        return Configuration.getBuilder();
+        Builder builder = Configuration.getBuilder();
+        builder.setQuery(query);
+        return builder;
     }
 
     /**
@@ -44,23 +56,22 @@ public class Builder {
 
     /**
      * 构建查询语句
-     * @param query QueryWrapper实例
      * @return String
      */
-    public String buildSelect(QueryWrapper query)
+    public String buildSelect()
     {
         String sql = getSelectSql();
-        return sql.replace("%DISTINCT%" , parseDistinct(query))
-                .replace("%FIELD%" , parseField(query))
-                .replace("%TABLE%" , parseTable(query))
-                .replace("%FORCE%" , parseForce(query))
-                .replace("%JOIN%" , parseJoin(query))
-                .replace("%WHERE%" , parseWhere(query))
-                .replace("%HAVING%" , parseHaving(query))
-                .replace("%GROUP%" , parseGroup(query))
-                .replace("%ORDER%" , parseOrder(query))
-                .replace("%LIMIT%" , parseLimit(query))
-                .replace("%LOCK%" , parseLock(query));
+        return sql.replace("%DISTINCT%" , parseDistinct())
+                .replace("%FIELD%" , parseField())
+                .replace("%TABLE%" , parseTable())
+                .replace("%FORCE%" , parseForce())
+                .replace("%JOIN%" , parseJoin())
+                .replace("%WHERE%" , parseWhere())
+                .replace("%HAVING%" , parseHaving())
+                .replace("%GROUP%" , parseGroup())
+                .replace("%ORDER%" , parseOrder())
+                .replace("%LIMIT%" , parseLimit())
+                .replace("%LOCK%" , parseLock());
     }
 
     public void bindData(Object data)
@@ -101,27 +112,25 @@ public class Builder {
 
     /**
      * 构建插入语句
-     * @param query QueryWrapper实例
      * @param replace 是否使用替换
      * @return String
      */
-    public String buildInsert(QueryWrapper query , boolean replace)
+    public String buildInsert(boolean replace)
     {
-
         Map data = query.getData();
         if(data.isEmpty()){
             return "";
         }
 
         // 没数据不允许插入
-        Map formatData = parseData(query,data,true);
+        Map formatData = parseData(data,true);
         // 经过格式化的数据
         List fields = getHashMapKeys(formatData);
         Collection values = formatData.values();
 
         //insertSql = "%INSERT% INTO %TABLE% (%FIELD%) VALUES (%DATA%)";
         return insertSql.replace("%INSERT%" , replace?"REPLACE":"INSERT")
-                .replace("%TABLE%" , parseTable(query))
+                .replace("%TABLE%" , parseTable())
                 .replace("%FIELD%" , StringUtil.join(" , " , fields))
                 .replace("%DATA%" , StringUtil.join(" , ",values))
                 ;
@@ -129,35 +138,33 @@ public class Builder {
 
     /**
      * 构建删除语句
-     * @param query QueryWrapper实例
      * @return String
      */
-    public String buildDelete(QueryWrapper query)
+    public String buildDelete()
     {
         //protected String deleteSql = "DELETE FROM %TABLE%%JOIN%%WHERE%%ORDER%%LIMIT% %LOCK%";
 
-        return deleteSql.replace("%TABLE%" , parseTable(query))
-                .replace("%JOIN%" , parseJoin(query))
-                .replace("%WHERE%" , parseWhere(query))
-                .replace("%ORDER%" , parseOrder(query))
-                .replace("%LIMIT%" , parseLimit(query))
-                .replace("%LOCK%" , parseLock(query))
+        return deleteSql.replace("%TABLE%" , parseTable())
+                .replace("%JOIN%" , parseJoin())
+                .replace("%WHERE%" , parseWhere())
+                .replace("%ORDER%" , parseOrder())
+                .replace("%LIMIT%" , parseLimit())
+                .replace("%LOCK%" , parseLock())
                 ;
     }
 
     /**
      * 构建更新语句
-     * @param query QueryWrapper实例
      * @return String
      */
-    public String buildUpdate( QueryWrapper query )
+    public String buildUpdate(  )
     {
 
         Map data = query.getData();
         if(data.isEmpty()){
             return "";
         }
-        Map formatData = parseData(query,data,false);
+        Map formatData = parseData(data,false);
         Set keys = formatData.keySet();
         ArrayList set = new ArrayList(keys.size());
         Iterator iter = keys.iterator();
@@ -168,11 +175,11 @@ public class Builder {
             set.add(key + "="+val);
         }
         //protected String updateSql = "UPDATE %TABLE% SET %SET%%JOIN%%WHERE%%ORDER%%LIMIT% %LOCK%";
-        return updateSql.replace("%TABLE%" , parseTable(query))
+        return updateSql.replace("%TABLE%" , parseTable())
                 .replace("%SET%" , StringUtil.join(" , " , set))
-                .replace("%JOIN%" , parseJoin(query))
-                .replace("%WHERE%" , parseWhere(query))
-                .replace("%LOCK%" , parseLock(query))
+                .replace("%JOIN%" , parseJoin())
+                .replace("%WHERE%" , parseWhere())
+                .replace("%LOCK%" , parseLock())
                 ;
     }
 
@@ -245,12 +252,11 @@ public class Builder {
 
     /**
      * 解析data数据
-     * @param query QueryWrapper实例
      * @param data  解析得Map数据
      * @param isInsert 是否插入
      * @return Map
      */
-    protected Map parseData(QueryWrapper query , Map data , boolean isInsert)
+    protected Map parseData( Map data , boolean isInsert)
     {
         Map result = new LinkedHashMap();
         // 分析数据
@@ -260,7 +266,7 @@ public class Builder {
         try {
             connection = Configuration.getConnectionConfig().getConn();
             st = connection.createStatement();
-            rs = st.executeQuery(getTableFind(parseTable(query)));
+            rs = st.executeQuery(getTableFind(parseTable()));
             ResultSetMetaData rsmd = rs.getMetaData();
             int len = rsmd.getColumnCount();
 
@@ -311,10 +317,9 @@ public class Builder {
 
     /**
      * 解析锁表
-     * @param query QueryWrapper实例
      * @return String
      */
-    protected String parseLock(QueryWrapper query)
+    protected String parseLock()
     {
         String lock = (String) query.getOption().get("lock");
         if(lock == null){
@@ -325,10 +330,9 @@ public class Builder {
 
     /**
      * 解析获取的行数
-     * @param query QueryWrapper实例
      * @return String
      */
-    protected String parseLimit(QueryWrapper query)
+    protected String parseLimit()
     {
         Map limit = (Map) query.getOption().get("limit");
         if(limit == null || limit.isEmpty()){
@@ -349,10 +353,9 @@ public class Builder {
 
     /**
      * 解析字段
-     * @param query QueryWrapper实例
      * @return String
      */
-    protected String parseField(QueryWrapper query)
+    protected String parseField()
     {
         List list = (List) query.getOption().get("field");
         if(list == null || list.size() == 0){
@@ -363,10 +366,9 @@ public class Builder {
 
     /**
      * 解析是否强制使用索引
-     * @param query QueryWrapper实例
      * @return String
      */
-    protected String parseForce(QueryWrapper query)
+    protected String parseForce()
     {
         List list = (List) query.getOption().get("force");
         if(list == null || list.size() == 0){
@@ -377,10 +379,9 @@ public class Builder {
 
     /**
      * 解析去重复
-     * @param query QueryWrapper实例
      * @return String
      */
-    protected String parseDistinct(QueryWrapper query)
+    protected String parseDistinct()
     {
         if( query.getOption().containsKey("distinct") && Boolean.valueOf(query.getOption().get("distinct").toString()).booleanValue()){
             return " DISTINCT ";
@@ -390,10 +391,9 @@ public class Builder {
 
     /**
      * 解析Having
-     * @param query QueryWrapper实例
      * @return String
      */
-    protected String parseHaving(QueryWrapper query)
+    protected String parseHaving()
     {
         if(query.getOption().containsKey("having")){
             return " HAVING "+query.getOption().get("having");
@@ -403,11 +403,10 @@ public class Builder {
 
     /**
      * 获取DaoModel的某个属性
-     * @param query QueryWrapper实例
      * @param key  键值
      * @return String
      */
-    protected String getOptionValue(QueryWrapper query , String key)
+    protected String getOptionValue( String key)
     {
         String val = ( String )query.getOption().get(key);
         if(val == null){
@@ -418,15 +417,14 @@ public class Builder {
 
     /**
      * 解析表
-     * @param query QueryWrapper实例
      * @return 返回解析后得表名称
      */
-    public String parseTable(QueryWrapper query)
+    public String parseTable()
     {
         String name = query.getPrefix() + query.getName();
         List list = (List) query.getOption().get("table");
         if(list == null || list.size() == 0){
-            return name+" "+ getOptionValue(query ,"alias");
+            return name+" "+ getOptionValue("alias");
         }
         if(!StringUtil.isNullOrEmpty(query.getPrefix()))
         {
@@ -439,10 +437,9 @@ public class Builder {
 
     /**
      * 解析json 连接
-     * @param query QueryWrapper实例
      * @return 解析后得数据
      */
-    public String parseJoin(QueryWrapper query)
+    public String parseJoin()
     {
         List list = (List) query.getOption().get("join");
         if(list == null || list.size() == 0){
@@ -453,10 +450,9 @@ public class Builder {
 
     /**
      * 解析分组
-     * @param query QueryWrapper实例
      * @return 解析后得分组信息
      */
-    public String parseGroup(QueryWrapper query)
+    public String parseGroup()
     {
         List orderList = (List) query.getOption().get("group");
         if(orderList == null || orderList.size() == 0){
@@ -469,10 +465,9 @@ public class Builder {
 
     /**
      * 解析排序
-     * @param query QueryWrapper实例
      * @return 解析得排序信息
      */
-    public String parseOrder(QueryWrapper query)
+    public String parseOrder()
     {
         List orderList = (List) query.getOption().get("order");
         if(orderList == null || orderList.size() == 0){
@@ -486,10 +481,9 @@ public class Builder {
 
     /**
      * 解析条件
-     * @param query QueryWrapper实例
      * @return 解析后得条件信息
      */
-    public String parseWhere( QueryWrapper query )
+    public String parseWhere(  )
     {
         List whereList = (List) query.getOption().get("where");
         if(whereList == null || whereList.size() == 0){
@@ -506,13 +500,14 @@ public class Builder {
                 buffer.append(map.get("connect") == null ? " AND " : map.get("connect"));
                 buffer.append(" ");
             }
+
             String where = (String) map.get("where");
-            if(where != null){
+            if( where!=null ){
                 buffer.append(" ").append(where).append(" ");
             }else{
-                String key = (String) map.get("name");
-                String exp = (String) map.get("exp");
-                Object val = map.get("value");
+                String key = (String) map.get("name"); //map.getName();
+                String exp = (String) map.get("exp"); //map.getExp();
+                Object val = map.get("value"); //map.getValue();
 
                 if(-1 != key.indexOf("|")){
                     String[] keys = key.split("\\|");
@@ -564,7 +559,7 @@ public class Builder {
 
             buffer.append(" ");
             buffer.append(key);
-            List<Object> sd = new ArrayList(inArrayList.size());
+
             buffer.append(" "+exp+"(");
             int i=0;
             for (Object data : inArrayList){
@@ -572,7 +567,6 @@ public class Builder {
                 if(i>0){
                     buffer.append(",");
                 }
-
                 buffer.append("?");
                 i++;
             }
@@ -607,7 +601,6 @@ public class Builder {
     protected List getParseWhereValueArray(Object val)
     {
         List inArrayList = new ArrayList();
-
 
         if(val instanceof List){
             return (List) val;

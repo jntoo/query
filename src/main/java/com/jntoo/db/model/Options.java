@@ -1,19 +1,19 @@
-package model;
+package com.jntoo.db.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class Options {
 
-    private List<Where> wheres;
+    private List<WhereModel> wheres;
     private List<String> field;
     private List<String> order;
     private List<String> group;
     private List<String> table;
-    private Map attrs;
-    private Limit limit;
+    private LimitModel limit;
     private String alias;
     private String having;
     private String lock;
@@ -25,7 +25,6 @@ public class Options {
         field = new ArrayList();
         order = new ArrayList();
         group = new ArrayList();
-        attrs = new HashMap();
         table = new ArrayList();
     }
 
@@ -33,7 +32,7 @@ public class Options {
     {
         this.table.add(table);
     }
-    public void addWhere(Where where)
+    public void addWhere(WhereModel where)
     {
         wheres.add(where);
     }
@@ -52,14 +51,14 @@ public class Options {
 
     public void setLimit(Integer size)
     {
-        limit = new Limit(size);
+        limit = new LimitModel(size);
     }
     public void setLimit(Integer offset , Integer size)
     {
-        limit = new Limit(offset , size);
+        limit = new LimitModel(offset , size);
     }
 
-    public List<Where> getWheres() {
+    public List<WhereModel> getWheres() {
         return wheres;
     }
 
@@ -75,7 +74,7 @@ public class Options {
         return group;
     }
 
-    public Limit getLimit() {
+    public LimitModel getLimit() {
         return limit;
     }
 
@@ -106,67 +105,29 @@ public class Options {
     public String getDistinct() {
         return distinct;
     }
-
     public void setDistinct(String distinct) {
         this.distinct = distinct;
     }
-
     public List<String> getTable() {
         return table;
     }
-
-
-    public void setWheres(List<Where> wheres) {
+    public void setWheres(List<WhereModel> wheres) {
         this.wheres = wheres;
     }
-
     public void setField(List<String> field) {
         this.field = field;
     }
-
     public void setOrder(List<String> order) {
         this.order = order;
     }
-
     public void setGroup(List<String> group) {
         this.group = group;
     }
-
     public void setTable(List<String> table) {
         this.table = table;
     }
-
-    public void setAttrs(Map attrs) {
-        this.attrs = attrs;
-    }
-
-    public void setLimit(Limit limit) {
+    public void setLimit(LimitModel limit) {
         this.limit = limit;
     }
 
-    /**
-     * 设置属性
-     * @param name
-     * @param value
-     * @return
-     *
-     */
-    public void setAttribute(String name , Object value)
-    {
-        attrs.put(name , value);
-    }
-
-    /**
-     * 获取属性
-     * @param name
-     * @return
-     */
-    public Object getAttribute(String name)
-    {
-        return attrs.get(name);
-    }
-
-    public Map getAttributes() {
-        return attrs;
-    }
 }

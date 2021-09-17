@@ -6,6 +6,7 @@ import com.jntoo.db.*;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * SQLserver 语句构造器
@@ -35,8 +36,8 @@ public class SqlServer extends Builder{
     }
 
     @Override
-    public String parseOrder(QueryWrapper query) {
-        ArrayList list = (ArrayList) query.getOption().get("order");
+    public String parseOrder() {
+        ArrayList list = (ArrayList) getQuery().getOption().get("order");
         if(list == null || list.size() == 0){
             return isPage() ? " ORDER BY rand() " : "";
         }else{
@@ -58,7 +59,7 @@ public class SqlServer extends Builder{
 
               }
           }
-        return super.parseOrder(query);
+        return super.parseOrder();
     }
 
     @Override
@@ -67,8 +68,8 @@ public class SqlServer extends Builder{
     }
 
     @Override
-    protected String parseLimit(QueryWrapper query) {
-        HashMap map = (HashMap) query.getOption().get("limit");
+    protected String parseLimit() {
+        Map map = (Map) getQuery().getOption().get("limit");
         if(map == null){
             return "";
         }

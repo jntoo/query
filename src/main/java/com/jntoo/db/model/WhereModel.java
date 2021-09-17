@@ -1,32 +1,43 @@
-package model;
+package com.jntoo.db.model;
 
-public class Where {
+import java.util.HashMap;
+
+public class WhereModel {
     private String name;
     private String exp;
     private Object value;
     private String connect;
-    private String raw;
-    public Where(){
+    private boolean raw = false;
+    public WhereModel(){
 
     }
 
-    public Where(String raw)
+    public WhereModel(String raw)
     {
-        this.raw = raw;
+        this.name = raw;
+        this.raw = true;
     }
 
-    public Where(String field , Object value){
+    public WhereModel(String field , Object value){
         this(field , null , value,null);
     }
-    public Where(String field , String exp , Object value)
+    public WhereModel(String field , String exp , Object value)
     {
         this(field , null , value,null);
     }
-    public Where(String field ,String exp, Object value , String connect){
+    public WhereModel(String field , String exp, Object value , String connect){
         name = field;
         this.exp = exp == null ? "=" : exp;
         this.value = value;
         this.connect = connect == null ? "and" : connect;
+    }
+
+    public boolean isRaw() {
+        return raw;
+    }
+
+    public void setRaw(boolean raw) {
+        this.raw = raw;
     }
 
     public String getName() {
@@ -35,27 +46,21 @@ public class Where {
     public void setName(String name) {
         this.name = name;
     }
-
     public String getExp() {
         return exp;
     }
-
     public void setExp(String exp) {
         this.exp = exp;
     }
-
     public Object getValue() {
         return value;
     }
-
     public void setValue(Object value) {
         this.value = value;
     }
-
     public String getConnect() {
         return connect;
     }
-
     public void setConnect(String connect) {
         this.connect = connect;
     }
