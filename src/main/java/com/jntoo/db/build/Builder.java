@@ -2,6 +2,7 @@ package com.jntoo.db.build;
 
 import com.jntoo.db.Configuration;
 import com.jntoo.db.QueryWrapperBase;
+import com.jntoo.db.model.LimitModel;
 import com.jntoo.db.model.WhereModel;
 import com.jntoo.db.utils.DB;
 import com.jntoo.db.utils.StringUtil;
@@ -81,6 +82,10 @@ public class Builder {
 
     public List<Object> getBindData() {
         return bindData == null ? new ArrayList() : bindData;
+    }
+
+    public void clearBindData() {
+        bindData.clear();
     }
 
     /**
@@ -321,8 +326,8 @@ public class Builder {
      */
     protected String parseLock()
     {
-        String lock = (String) query.getOption().get("lock");
-        if(lock == null){
+        String lock = query.getOptions().getLock();
+        if( StringUtil.isNullOrEmpty(lock) ){
             return "";
         }
         return lock;
@@ -334,12 +339,12 @@ public class Builder {
      */
     protected String parseLimit()
     {
-        Map limit = (Map) query.getOption().get("limit");
-        if(limit == null || limit.isEmpty()){
+        LimitModel limit = query.getOptions().getLimit();
+        if( limit == null ){
             return "";
         }
-        Object offset = limit.get("offset");
-        Object pagesize  = limit.get("limit");
+        Long offset = limit.getOffset();
+        Long pagesize  = limit.getSize();
         if( offset == null ){
             bindData(pagesize);
             //return " LIMIT "+pagesize+" ";
@@ -357,10 +362,10 @@ public class Builder {
      */
     protected String parseField()
     {
-        List list = (List) query.getOption().get("field");
-        if(list == null || list.size() == 0){
+        if(!query.getOptions().isField()){
             return "*";
         }
+        List list = query.getOptions().getField();
         return StringUtil.join("," , list);
     }
 
@@ -370,11 +375,11 @@ public class Builder {
      */
     protected String parseForce()
     {
-        List list = (List) query.getOption().get("force");
-        if(list == null || list.size() == 0){
+        String list =  query.getOptions().getForce();
+        if( StringUtil.isNullOrEmpty(list)){
             return "";
         }
-        return String.format(" FORCE INDEX ( %s ) " , StringUtil.join("," , list));
+        return String.format(" FORCE INDEX ( %s ) " , list);
     }
 
     /**
@@ -383,7 +388,7 @@ public class Builder {
      */
     protected String parseDistinct()
     {
-        if( query.getOption().containsKey("distinct") && Boolean.valueOf(query.getOption().get("distinct").toString()).booleanValue()){
+        if( query.getOptions().isDistinct() ){
             return " DISTINCT ";
         }
         return "";
@@ -395,25 +400,14 @@ public class Builder {
      */
     protected String parseHaving()
     {
-        if(query.getOption().containsKey("having")){
-            return " HAVING "+query.getOption().get("having");
+        String having = query.getOptions().getHaving();
+        if(!StringUtil.isNullOrEmpty(having)){
+            return " HAVING "+having;
         }
         return "";
     }
 
-    /**
-     * 获取DaoModel的某个属性
-     * @param key  键值
-     * @return String
-     */
-    protected String getOptionValue( String key)
-    {
-        String val = ( String )query.getOption().get(key);
-        if(val == null){
-            return "";
-        }
-        return val+" ";
-    }
+
 
     /**
      * 解析表
@@ -422,9 +416,13 @@ public class Builder {
     public String parseTable()
     {
         String name = query.getPrefix() + query.getName();
-        List list = (List) query.getOption().get("table");
+        List list =  query.getOptions().getTable();
+        String alias = query.getOptions().getAlias();
+        if(StringUtil.isNullOrEmpty(alias)){
+            alias = "";
+        }
         if(list == null || list.size() == 0){
-            return name+" "+ getOptionValue("alias");
+            return name+" "+alias;
         }
         if(!StringUtil.isNullOrEmpty(query.getPrefix()))
         {
@@ -441,7 +439,7 @@ public class Builder {
      */
     public String parseJoin()
     {
-        List list = (List) query.getOption().get("join");
+        List list = (List) query.getOptions().getJoin();
         if(list == null || list.size() == 0){
             return "";
         }
@@ -454,7 +452,7 @@ public class Builder {
      */
     public String parseGroup()
     {
-        List orderList = (List) query.getOption().get("group");
+        List orderList = (List) query.getOptions().getGroup();
         if(orderList == null || orderList.size() == 0){
             return "";
         }
@@ -469,7 +467,7 @@ public class Builder {
      */
     public String parseOrder()
     {
-        List orderList = (List) query.getOption().get("order");
+        List orderList = (List) query.getOptions().getOrder();
         if(orderList == null || orderList.size() == 0){
             return "";
         }
@@ -485,7 +483,7 @@ public class Builder {
      */
     public String parseWhere(  )
     {
-        List whereList = (List) query.getOption().get("where");
+        List<WhereModel> whereList = (List) query.getOptions().getWhere();
         if(whereList == null || whereList.size() == 0){
             return "";
         }
@@ -493,21 +491,21 @@ public class Builder {
 
         for(int i=0;i<whereList.size();i++)
         {
-            Map map = (Map) whereList.get(i);
+            WhereModel map = (WhereModel) whereList.get(i);
             if(i!=0){
                 // 每一个的连接符
                 buffer.append(" ");
-                buffer.append(map.get("connect") == null ? " AND " : map.get("connect"));
+                buffer.append(map.getConnect() == null ? " AND " : map.getConnect());
                 buffer.append(" ");
             }
 
-            String where = (String) map.get("where");
-            if( where!=null ){
-                buffer.append(" ").append(where).append(" ");
+            //String where = (String) map.get("where");
+            if( map.isRaw() ){
+                buffer.append(" ").append(map.getName()).append(" ");
             }else{
-                String key = (String) map.get("name"); //map.getName();
-                String exp = (String) map.get("exp"); //map.getExp();
-                Object val = map.get("value"); //map.getValue();
+                String key = map.getName();
+                String exp = map.getExp();
+                Object val = map.getValue();
 
                 if(-1 != key.indexOf("|")){
                     String[] keys = key.split("\\|");
@@ -601,8 +599,40 @@ public class Builder {
     protected List getParseWhereValueArray(Object val)
     {
         List inArrayList = new ArrayList();
-
-        if(val instanceof List){
+        if(val.getClass().isArray()){
+            if(val instanceof String[]){
+                Arrays.asList((String[]) val);
+            }else{
+                return Arrays.asList((Object[]) val);
+            }
+        }else if(val instanceof String){
+            String[] arr = ((String) val).split(",");
+            return Arrays.asList(arr);
+        }else if(val instanceof List){
+            return (List) val;
+        }else if(val instanceof Collection){
+            inArrayList.addAll((Collection)val);
+            return inArrayList;
+        }else if(val instanceof Iterable){
+            Iterator it = ((Iterable)val).iterator();
+            while(it.hasNext()){
+                Object str = it.next();
+                inArrayList.add(str);
+            }
+            return inArrayList;
+        }else if(val instanceof Map){
+            Map var = (Map) val;
+            Iterator entries = var.entrySet().iterator();
+            while (entries.hasNext()) {
+                Map.Entry entry = (Map.Entry) entries.next();
+                Object value = entry.getValue();
+                inArrayList.add(value);
+            }
+        }else{
+            inArrayList.add(val);
+        }
+        return  inArrayList;
+        /*if(val instanceof List){
             return (List) val;
         }else if(val instanceof String || val instanceof String[]){
             String[] inList = val instanceof String ? ((String)val).split(",") : (String[]) val;
@@ -653,7 +683,7 @@ public class Builder {
         } else {
             System.err.println("not instanceof Type "+val.getClass().getName());
         }
-        return inArrayList;
+        return inArrayList;*/
     }
 
     /**

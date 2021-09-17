@@ -1,29 +1,29 @@
 package com.jntoo.db.model;
 
 public class LimitModel {
-    private Integer offset;
-    private Integer size;
+    private Long offset;
+    private Long size;
 
     public LimitModel(){}
 
-    public LimitModel(Integer size) {
+    public LimitModel(Long size) {
         this.size = size;
     }
-    public LimitModel(Integer offset, Integer size) {
+    public LimitModel(Long offset, Long size) {
         this.offset = offset;
         this.size = size;
     }
 
-    public Integer getOffset() {
+    public Long getOffset() {
         return offset;
     }
-    public void setOffset(Integer offset) {
+    public void setOffset(Long offset) {
         this.offset = offset;
     }
-    public Integer getSize() {
+    public Long getSize() {
         return size;
     }
-    public void setSize(Integer size) {
+    public void setSize(Long size) {
         this.size = size;
     }
 }

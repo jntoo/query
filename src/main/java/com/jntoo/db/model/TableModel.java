@@ -1,5 +1,7 @@
 package com.jntoo.db.model;
 
+import com.jntoo.db.has.HasQuery;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,11 +19,14 @@ public class TableModel {
     public Class<?> entity;
 
     public Map<String,FieldInfoModel> fieldInfo = new HashMap();
+    private List<FieldInfoModel> fieldInfos = new ArrayList();
+
+    private List<HasQuery> hasQuery = new ArrayList();
+
     public List<String> autoInsertTimeField = new ArrayList();
     public List<String> autoInserField = new ArrayList();
     public List<String> autoUpdateTimeField = new ArrayList();
     public List<String> autoUpdateField = new ArrayList();
-
 
     public String getName() {
         return name;
@@ -47,13 +52,28 @@ public class TableModel {
         this.pk = pk;
     }
 
-
     public FieldInfoModel getFieldInfo(String field) {
         return fieldInfo.get(field);
     }
 
+    public List<FieldInfoModel> getFieldInfos()
+    {
+        return fieldInfos;
+    }
+
     public void setFieldInfo(String field ,  FieldInfoModel fieldInfo) {
+        fieldInfos.add(fieldInfo);
         this.fieldInfo.put(field , fieldInfo);
+    }
+
+    public void addHasQuery(HasQuery query)
+    {
+        hasQuery.add(query);
+    }
+
+    public List<HasQuery> getHasQuery()
+    {
+        return hasQuery;
     }
 
     public Class<?> getEntity() {

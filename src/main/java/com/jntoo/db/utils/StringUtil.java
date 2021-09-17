@@ -183,4 +183,25 @@ public class StringUtil {
         }
         return buffer.toString();
     }
+
+    protected String parseName(String name) {
+        String c = toLineString(name);
+        return c.substring(0, 1).toUpperCase() + c.substring(1);
+    }
+
+
+    public static String toLineString(String string) {
+
+        StringBuilder stringBuilder = new StringBuilder();
+        String[] str = string.split("_");
+        for (String string2 : str) {
+            if (stringBuilder.length() == 0) {
+                stringBuilder.append(string2);
+            } else {
+                stringBuilder.append(string2.substring(0, 1).toUpperCase());
+                stringBuilder.append(string2.substring(1));
+            }
+        }
+        return stringBuilder.toString();
+    }
 }

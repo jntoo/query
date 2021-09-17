@@ -4,9 +4,14 @@ package com.jntoo.db;
 import com.alibaba.fastjson.JSON;
 import com.jntoo.db.annotation.FieldType;
 import com.jntoo.db.annotation.Fields;
+import com.jntoo.db.annotation.HasOne;
 import com.jntoo.db.build.Builder;
+import com.jntoo.db.has.HasManyQuery;
+import com.jntoo.db.has.HasOneQuery;
+import com.jntoo.db.has.HasQuery;
 import com.jntoo.db.model.*;
 import com.jntoo.db.utils.*;
+import sun.dc.pr.PRError;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -21,16 +26,16 @@ import java.util.*;
  * 目前只实现了部分方法，之后会继续完善该代码,让其支持实体类的数据获取
  * 使用方法：Query.make("表名称").where("字段名" , "条件符号","条件值").select()
  */
-abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
+abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> extends QueryOptions<TS> {
     protected String mName = "";
-    protected Map mOption = null;
+    //protected Map mOption = null;
     protected String pk = "id";
     protected String prefix = ""; // 设置表前缀
     protected Map mData = null;
     protected Builder builder = null;
     protected TableModel tableModel;
     protected T model;
-    //protected Options options;
+    /*protected Options options;*/
 
     public QueryWrapperBase() {
         reset();
@@ -96,22 +101,20 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
      *
      * @return 重置数据信息
      */
-    protected TS reset() {
+    @Override
+    protected void reset() {
+        super.reset();
         ConnectionConfig connectionConfig = Configuration.getConnectionConfig();
         if (connectionConfig == null) {
             throw new RuntimeException("not ConnectionConfig");
         }
         model = null;
         mName = "";
-        mOption = null;
-        mOption = new HashMap();
+        //mOption = null;
+        //mOption = new HashMap();
         mData = new HashMap();
-
-        //options = new Options();
-
         builder = Builder.make(this);
         prefix = Configuration.getPrefix();
-        return (TS)this;
     }
 
 
@@ -254,7 +257,7 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
             model = updateData;
             mData.putAll(entityToMap(updateData));
         }
-        if (getOptionArrayList("where").size() == 0) {
+        if (!options.isWhere()) {
             if (!mData.containsKey(getPk())) // 没有条件，不更新
             {
                 return false;
@@ -352,9 +355,10 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
             HashMap map = new HashMap();
             try {
                 Class c = data.getClass();
-                Field[] fields = c.getDeclaredFields();
-                for (Field field : fields) {
-                    FieldInfoModel fieldInfo = tableModel.getFieldInfo(field.getName());
+                List<FieldInfoModel> fieldInfos = tableModel.getFieldInfos();//c.getDeclaredFields();
+                for (FieldInfoModel fieldInfo : fieldInfos) {
+                    Field field = fieldInfo.getField();
+                    //FieldInfoModel fieldInfo = tableModel.getFieldInfo(field.getName());
                     if (fieldInfo == null) continue;
                     String name = fieldInfo.getName(); //getFieldName(field);
                     Fields annotation = fieldInfo.getAnnField(); //field.getAnnotation(Fields.class);
@@ -506,36 +510,6 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
         this.pk = pk;
     }
 
-    /**
-     * 尚未实现该代码，获取表的数据
-     */
-    protected void finalize() {
-
-        //free();
-    }
-
-    /**
-     * 释放资源
-     */
-    /*public void free() {
-        // 释放rs
-
-        for (int i = 0; i < resultSetList.size(); i++) {
-            Object os = resultSetList.get(i);
-            try {
-                if (os instanceof Statement) {
-                    Statement st = ((Statement) os);
-                    st.close();
-                } else if (os instanceof ResultSet) {
-                    ((ResultSet) os).close();
-                }else if(os instanceof Connection){
-
-                }
-            } catch (SQLException e) {
-            }
-        }
-        resultSetList.clear();
-    }*/
 
     /**
      * 设置表名称
@@ -557,143 +531,6 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
         return mName;
     }
 
-    /**
-     * 设置属性
-     *
-     * @param name  属性名
-     * @param value 属性值
-     * @return 当前实例
-     */
-    public TS setAttribute(String name, Object value) {
-        getOptionHashMap("data").put(name, value);
-        return (TS)this;
-    }
-
-    /**
-     * 获取属性
-     *
-     * @param name 属性名
-     * @return 属性值
-     */
-    public Object getAttribute(String name) {
-        return getOptionHashMap("data").get(name);
-    }
-
-    /**
-     * 设置字段为 获取所有字段
-     *
-     * @return 当前实例
-     */
-    public TS field() {
-        return field("*");
-    }
-
-    /**
-     * 设置字段，可以用","逗号隔开多个
-     *
-     * @param field 字段名
-     * @return 当前实例
-     */
-    public TS field(String field) {
-        //options.addField(field);
-        getOptionArrayList("field").add(field);
-        return (TS)this;
-    }
-
-    /**
-     * 设置表
-     *
-     * @param nTable 设置表
-     * @return 当前实例
-     */
-    public TS table(String nTable) {
-        getOptionArrayList("table").add(nTable);
-        return (TS)this;
-    }
-
-    /**
-     * 设置表
-     *
-     * @param nTable 当前表
-     * @param alias  别名
-     * @return 当前实例
-     */
-    public TS table(String nTable, String alias) {
-        getOptionArrayList("table").add(nTable + " " + alias);
-        return (TS)this;
-    }
-
-    /**
-     * 设置行数
-     *
-     * @param nLimit 获取得行数
-     * @return 当前实例
-     */
-    public TS limit(String nLimit) {
-        if (nLimit.indexOf(",") != -1) {
-            String[] list = nLimit.split(",");
-            return limit(Convert.toLong(list[0]), Convert.toLong(list[1]));
-        }
-
-        return limit(Convert.toLong(nLimit));
-    }
-
-    /**
-     * 设置起始行和行数
-     *
-     * @param offset 获取得位置
-     * @param nLimit 获取行数
-     * @return 当前实例
-     */
-    public TS limit(String offset, String nLimit) {
-        return limit(Convert.toLong(offset), Convert.toLong(nLimit));
-    }
-
-    /**
-     * 设置是否锁表
-     *
-     * @param lock 是否锁表默认为false
-     * @return 当前实例
-     */
-    public TS lock(boolean lock) {
-        return this.lock(lock ? " FOR UPDATE " : "");
-    }
-
-    /**
-     * 设置锁表代码
-     *
-     * @param lock 所部得代码
-     * @return 当前实例
-     */
-    public TS lock(String lock) {
-        getOption().put("lock", lock);
-        return (TS)this;
-    }
-
-    /**
-     * 设置行数，字符串形式
-     *
-     * @param nLimit 行数
-     * @return 当前实例
-     */
-    public TS limit(long nLimit) {
-        getOptionHashMap("limit").put("limit", nLimit);
-        return (TS)this;
-    }
-
-    /**
-     * 设置起始行和行数
-     *
-     * @param offset 偏移位置
-     * @param nLimit 获取行数
-     * @return 当前实例
-     */
-    public TS limit(long offset, long nLimit) {
-        HashMap map = getOptionHashMap("limit");
-        map.put("limit", nLimit);
-        map.put("offset", offset);
-        return (TS)this;
-    }
 
     /**
      * 根据ID 获取一行数据
@@ -702,7 +539,7 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
      * @return ${T}实例信息
      */
     public T find(Object id) {
-        where(pk, id);
+        where(getPk(), id);
         return find();
     }
 
@@ -714,13 +551,105 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
     public T find() {
         //limit(1);
         String sql = builder.buildSelect();
-        return (T)DB.find(sql , model != null ? model.getClass() : Map.class , builder.getBindData().toArray());
 
-        /*ResultSet rs = query(sql);
-        T data = fetchEntity(rs);
-        free();
-        return data;*/
+        T result = (T)DB.find(sql , model != null ? model.getClass() : Map.class , builder.getBindData().toArray());
+        if(result == null){
+            return null;
+        }
+        if(!(result instanceof Map))
+        {
+            if( options.isHasQuery() )
+            {
+                List<T> hasList = new ArrayList(3);
+                hasList.add(result);
+                setHasQuery(hasList , options.getHasQuery());
+            }
+            if(tableModel.getHasQuery().size() > 0)
+            {
+                List<T> hasList = new ArrayList(3);
+                hasList.add(result);
+                setHasQuery(hasList , tableModel.getHasQuery());
+            }
+        }
+
+        return result;
     }
+
+    protected void setHasQuery( List<T> list , List<HasQuery> queryList )
+    {
+        if (list.size() > 0){
+            T result = list.get(0);
+
+            Class resultClass = result.getClass();
+            ArrayList values = new ArrayList(list.size());
+
+            // 有带入
+            for (HasQuery has : queryList)
+            {
+                Class<?> target = has.getTarget();
+                TableModel targetModel = TableManageUtils.getTable(target);
+
+                QueryWrapper queryWrapper = DB.name(target);
+                queryWrapper.setOptions(has.getOptions());
+
+                Field targetField;
+                try {
+                    Field field = resultClass.getDeclaredField(has.getForeignKey());
+                    field.setAccessible(true);
+                    for (T t : list) {
+                        values.add(field.get(t));
+                    }
+
+                    targetField = resultClass.getDeclaredField(has.getField());
+                    Field targetLocalKeyField = targetModel.getFieldInfo(has.getLocalKey()).getField();
+
+                    String targetFieldName = targetModel.getFieldInfo(has.getLocalKey()).getName();
+                    if (values.size() == 1){
+                        queryWrapper.where(targetFieldName , values.get(0));
+                    }else{
+                        queryWrapper.whereIn(targetFieldName , values);
+                    }
+
+                    if(has instanceof HasOneQuery)
+                    {
+                        List selectList = queryWrapper.select();
+                        Map keyToData = new HashMap();
+                        for (Object o : selectList) {
+                            // 将这些数据写成Map 格式
+                            Object key = Convert.toStr(TableManageUtils.getFieldValue( targetLocalKeyField , o ));
+                            keyToData.put(key  , o);
+                        }
+                        for (T t : list) {
+                            Object key = Convert.toStr(TableManageUtils.getFieldValue( field , t ));
+                            Object value = keyToData.get(key);
+                            TableManageUtils.setFieldValue(targetField , t , value);
+                        }
+                    }else if (has instanceof HasManyQuery) {
+                        List selectList = queryWrapper.select();
+                        Map<Object , List> keyToData = new HashMap();
+                        for (Object o : selectList) {
+                            // 将这些数据写成Map 格式
+                            Object key = Convert.toStr(TableManageUtils.getFieldValue( targetLocalKeyField , o ));
+                            if( !keyToData.containsKey(key) )
+                            {
+                                keyToData.put(key , new ArrayList());
+                            }
+                            keyToData.get(key).add(o);
+                        }
+                        for (T t : list) {
+                            Object key = Convert.toStr(TableManageUtils.getFieldValue( field , t ));
+                            TableManageUtils.setFieldValue(targetField , t , keyToData.get(key));
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                values.clear();
+            }
+
+        }
+    }
+
 
     /**
      * 根据当前条件获取一行数据
@@ -756,11 +685,13 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
     protected double total(String f, String func) {
         String ifnull = builder.parseIfNull(func + "(" + f + ")", "0");
         String field = ifnull + " count";
-        if (mOption.containsKey("field")) {
-            getOptionArrayList("field").clear();
+        List source = options.getField();
+        if (options.isField()) {
+            options.setField(new ArrayList());
         }
-        getOptionArrayList("field").add(field);
+        options.addField(field);
         Map data = findMap();
+        options.setField(source);
         if (data.containsKey("count")) {
             String count = data.get("count").toString();
             return Double.valueOf(count).doubleValue();
@@ -824,24 +755,33 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
      */
     public long count(String field) {
         if (field == null) {
-            if (mOption.containsKey("alias")) {
-                field = "count(" + mOption.get("alias") + ".id) count";
+            if (!StringUtil.isNullOrEmpty(options.getAlias())) {
+                field = "count(" + options.getAlias() + ".id) count";
             } else {
                 field = "count(*) count";
             }
         } else {
             field = "count(" + field + ") count";
         }
-        if (mOption.containsKey("field")) {
-            mOption.put("field", new ArrayList());
-            //getOptionArrayList("field").clear();
-        }
-        if (mOption.containsKey("order")) {
-            mOption.remove("order");
-        }
-        getOptionArrayList("field").add(field);
+
+        List sourceField = options.getField();
+        List sourceOrder = options.getOrder();
+        List sourceGroup = options.getGroup();
+        LimitModel limitModel = options.getLimit();
+
+        options.setField(new ArrayList(1));
+        options.setOrder(new ArrayList(1));
+        options.setGroup(new ArrayList(1));
+        options.setLimit((LimitModel) null);
+
+        options.addField(field);
         Map data = findMap();
-        if (data.containsKey("count")) {
+        options.setField(sourceField);
+        options.setOrder(sourceOrder);
+        options.setGroup(sourceGroup);
+        options.setLimit(limitModel);
+
+        if (data != null && data.containsKey("count")) {
             return Long.valueOf((String) data.get("count")).longValue();
         }
         return 0;
@@ -877,7 +817,7 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
      * @return 删除得行数
      */
     public long delete() {
-        if (!mOption.containsKey("where")) {
+        if (!options.isWhere()) {
             return -1;
         }
         String sql = this.builder.buildDelete();
@@ -921,25 +861,41 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
      * @return 列表行
      */
     public List select() {
-        //List<T> result = new ArrayList();
+        if (model != null) {
+            where(model);
+        }
+
+        String sql = builder.buildSelect();
+
+        List selectList = DB.select(sql , model != null ? model.getClass() : Map.class , builder.getBindData().toArray());
+        if(selectList.size() == 0)
+        {
+            return selectList;
+        }
+
+        if( options.isHasQuery() )
+        {
+            setHasQuery(selectList , options.getHasQuery());
+        }
+        if(tableModel.getHasQuery().size() > 0)
+        {
+            setHasQuery(selectList , tableModel.getHasQuery());
+        }
+
+        return selectList;
+    }
+
+    /**
+     * 根据当前条件获取数据集
+     *
+     * @return 列表行
+     */
+    public List selectMap() {
         if (model != null) {
             where(model);
         }
         String sql = builder.buildSelect();
-        return DB.select(sql , model != null ? model.getClass() : Map.class , builder.getBindData().toArray());
-
-/*
-
-        ResultSet rs = query(sql);
-        if (rs == null) {
-            return result;
-        }
-        T data = null;
-        while (((data = fetchEntity(rs)) != null)) {
-            result.add(data);
-        }
-        free();
-        return result;*/
+        return DB.select(sql , Map.class , builder.getBindData().toArray());
     }
 
     protected String getFieldName(Field field) {
@@ -949,26 +905,6 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
         }
         return field.getName();
     }
-
-
-//    public String fetchSelectSql()
-//    {
-//        String sql = builder.buildSelect(this);
-//        List<Object> bindData = builder.getBindData();
-//    }
-//
-//    protected String bindDataToSql(String sql , List<Object> bindData)
-//    {
-//        try {
-//            PreparedStatement statement = getConn().prepareStatement(sql);
-//            setBindData(statement , bindData);
-//
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
-
 
     protected T getInstance(Class<T> superClass) {
         try {
@@ -983,7 +919,6 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
             throw new RuntimeException(e);
         }
     }
-
 
     protected T getInstanceOfT() {
         if (model != null) {
@@ -1000,95 +935,6 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
         return getInstanceOfT();
     }
 
-    /**
-     * 根据ResultSet 获取数据行
-     *
-     * @param rs 结果集
-     * @return 实例
-     */
-    public T fetchEntity(ResultSet rs) {
-        T data = getTemplate();
-        if (data instanceof Map) {
-            return (T) fetch(rs);
-        }
-        if (rs == null) {
-            return null;
-        }
-
-        try {
-            Object o;
-            o = DB.fetchEntity(rs, tableModel);
-            return (T)o;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        /*try {
-            if (rs.next()) {
-                Field[] fields = data.getClass().getDeclaredFields();
-                for (Field field : fields) {
-                    try {
-                        FieldInfoModel infoModel = tableModel.fieldInfo.get(field.getName());
-                        if(infoModel == null )continue;
-                        Object result = infoModel.getGetMethod().invoke(rs, infoModel.getName());
-
-                        Fields annField = infoModel.getAnnField();
-                        Class<?> type = field.getType();
-                        Method method = infoModel.getSetMethod();
-
-                        if (annField != null && annField.type() == FieldType.JSON) {
-                            try {
-                                String jsonData = String.valueOf(result);
-                                // JSON 数据格式
-                                if (Map.class.isAssignableFrom(type)) {
-                                    Map map = JSON.parseObject(jsonData);
-                                    method.invoke(data, map);
-                                } else if (Collection.class.isAssignableFrom(type)) {
-                                    Collection collection = JSON.parseArray(jsonData);
-                                    method.invoke(data, collection);
-                                } else {
-                                    method.invoke(data, JSON.parseObject(jsonData, type));
-                                }
-                            } catch (JSONException e) {
-
-                            }
-                        } else {
-                            method.invoke(data, result);
-                        }
-                    } catch (Exception sql) {
-                        sql.printStackTrace();
-                    }
-                }
-                return data;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }*/
-
-        return null;
-    }
-
-    protected String parseName(String name) {
-        String c = toLineString(name);
-        return c.substring(0, 1).toUpperCase() + c.substring(1);
-    }
-
-
-    public static String toLineString(String string) {
-
-        StringBuilder stringBuilder = new StringBuilder();
-        String[] str = string.split("_");
-        for (String string2 : str) {
-            if (stringBuilder.length() == 0) {
-                stringBuilder.append(string2);
-            } else {
-                stringBuilder.append(string2.substring(0, 1).toUpperCase());
-                stringBuilder.append(string2.substring(1));
-            }
-        }
-        return stringBuilder.toString();
-    }
-
 
     /**
      * 根据ResultSet 获取数据行
@@ -1097,93 +943,13 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
      * @return Map结果
      */
     public Map fetch(ResultSet rs) {
-
         try {
             return DB.fetchMap(rs);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
-        /*QMap data = new QMap();
-        if (rs == null) return null;
-        try {
-            if (rs.next()) {
-                ResultSetMetaData rsmd = rs.getMetaData();
-                int columnCount = rsmd.getColumnCount();
-                for (int i = 1; i <= columnCount; i++) {
-                    String name = rsmd.getColumnName(i);
-                    String value = rs.getString(i);
-                    if (value == null || value.toLowerCase().equals("null")) {
-                        value = "";
-                    }
-                    data.put(name, value);
-                }
-
-            } else {
-                return null;
-            }
-        } catch (SQLException sql) {
-            sql.printStackTrace();
-        }
-        return data;*/
     }
-
-    /*protected ArrayList resultSetList = new ArrayList();*/
-
-    /**
-     * 查询sql 语句并返回ResultSet，这个不需要释放，系统在释放时会自动释放
-     *
-     * @param sql 查询得sql 语句
-     * @return 结果集
-     *//*
-    public ResultSet query(String sql) {
-        return query(sql, builder.getBindData());
-    }
-
-    *//**
-     * 查询sql 语句并返回ResultSet，这个不需要释放，系统在释放时会自动释放
-     *
-     * @param sql      sql 语句
-     * @param bindData 绑定值
-     * @return 结果集
-     *//*
-    public ResultSet query(String sql, List<Object> bindData) {
-        try {
-            Connection conn = Configuration.getConnectionConfig().getConn();
-            PreparedStatement statement = conn.prepareStatement(sql);
-            setBindData(statement, bindData);
-            //Statement st = conn.createStatement();
-            ResultSet rs = statement.executeQuery();
-            DB.log(sql, bindData);
-            resultSetList.add(rs);
-            resultSetList.add(statement);
-            return rs;
-        } catch (SQLException e) {
-            DB.log(e, sql);
-        }
-        return null;
-    }
-
-    protected void setBindData(PreparedStatement statement, List bindData) throws SQLException {
-        for (int i = 0; i < bindData.size(); i++) {
-            Object data = bindData.get(i);
-            int index = i + 1;
-            if (data instanceof Integer) {
-                statement.setInt(index, (Integer) data);
-            } else if (data instanceof Float) {
-                statement.setFloat(index, (Float) data);
-            } else if (data instanceof Long) {
-                statement.setLong(index, (Long) data);
-            } else if (data instanceof Double) {
-                statement.setDouble(index, (Double) data);
-            } else if(data instanceof String){
-                statement.setString(index , (String) data);
-            } else {
-                statement.setObject(index, data);
-            }
-        }
-    }*/
-
 
     /**
      * 根据当前条件获取一行数据中的某个字段的值
@@ -1192,7 +958,7 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
      * @return 值
      */
     public String value(String name) {
-        if (!mOption.containsKey("field")) {
+        if (!options.isField()) {
             field(name);
         }
         Map data = findMap();
@@ -1200,322 +966,6 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
             return "";
         }
         return String.valueOf(data.get(name));
-    }
-
-    /**
-     * 设置SQL 分组
-     *
-     * @param nGroup 分组信息
-     * @return 当前实例
-     */
-    public TS group(String nGroup) {
-        getOptionArrayList("group").add(nGroup);
-        return (TS)this;
-    }
-
-    /**
-     * 设置 SQL 排序字段
-     *
-     * @param nOrder 字段名和排序信息
-     * @return 当前实例
-     */
-    public TS order(String nOrder) {
-        getOptionArrayList("order").add(nOrder);
-        return (TS)this;
-    }
-
-    /**
-     * 设置 SQL 排序字段
-     *
-     * @param nOrder 字段名
-     * @param sort   排序名
-     * @return 当前实例
-     */
-    public TS order(String nOrder, String sort) {
-        getOptionArrayList("order").add(nOrder + " " + sort);
-        return (TS)this;
-    }
-
-    /**
-     * 设置 SQL 排序字段
-     *
-     * @param nOrder 字段名
-     * @return 当前实例
-     */
-    public TS orderDesc(String nOrder) {
-        getOptionArrayList("order").add(nOrder + " desc");
-        return (TS)this;
-    }
-
-    /**
-     * 设置 SQL 升序字段
-     *
-     * @param nOrder 字段名
-     * @return 当前实例
-     */
-    public TS orderAsc(String nOrder) {
-        getOptionArrayList("order").add(nOrder + " asc");
-        return (TS)this;
-    }
-
-
-    /**
-     * 设置SQL语句使用全连接 会生成如下：INNER JOIN table t on cond 的形式
-     *
-     * @param table 表名 as 别名
-     * @param cond  条件
-     * @return 当前实例
-     */
-    public TS joinInner(String table, String cond) {
-        return join(table, cond, "INNER");
-    }
-
-    /**
-     * 设置sql 语句使用右连接 会生成如下：RIGHT JOIN table t on cond 的形式
-     *
-     * @param table 表名 as 别名
-     * @param cond  条件
-     * @return 当前实例
-     */
-    public TS joinRight(String table, String cond) {
-        return join(table, cond, "RIGHT");
-    }
-
-    /**
-     * 设置sql 语句使用左连接 会生成如下：table t on cond 的形式
-     *
-     * @param table 表名 as 别名
-     * @param cond  条件
-     * @return 当前实例
-     */
-    public TS joinLeft(String table, String cond) {
-        return join(table, cond, "LEFT");
-    }
-
-    /**
-     * 设置sql 语句使用右连接 会生成如下：type JOIN table t on cond 的形式
-     *
-     * @param table 表名 as 别名
-     * @param cond  条件
-     * @param type  跨不同类型
-     * @return 当前实例
-     */
-    public TS join(String table, String cond, String type) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append(" ").append(type).append(" JOIN ").append(table).append(" ON ").append(cond);
-
-        getOptionArrayList("join").add(buffer.toString());
-        return (TS)this;
-    }
-
-    /**
-     * 设置当前表的别名
-     *
-     * @param name 别名
-     * @return 当前实例
-     */
-    public TS alias(String name) {
-        mOption.put("alias", name);
-        return (TS)this;
-    }
-
-    /**
-     * 获取设置参数
-     *
-     * @param type 属性名
-     * @return 属性得值
-     */
-    protected HashMap getOptionHashMap(String type) {
-        if (mOption.containsKey(type)) {
-            return (HashMap) mOption.get(type);
-        }
-        HashMap map = new HashMap();
-        mOption.put(type, map);
-        return map;
-    }
-
-    /**
-     * 获取设置参数
-     *
-     * @param type 属性名
-     * @return 属性列表值
-     */
-    protected ArrayList getOptionArrayList(String type) {
-        if (mOption.containsKey(type)) {
-            return (ArrayList) mOption.get(type);
-        }
-        ArrayList map = new ArrayList();
-        mOption.put(type, map);
-        return map;
-    }
-
-    /**
-     * 设置SQL条件
-     *
-     * @param name sql条件
-     * @return 当前实例
-     */
-    public TS where(String name) {
-        HashMap list = new HashMap();
-        list.put("where", name);
-        getOptionArrayList("where").add(list);
-        //getOptionArrayList("where").add(new WhereModel(name));
-        return (TS)this;
-    }
-
-    /**
-     * 设置SQL条件 会自动写成 and name='value' 这样的形式
-     *
-     * @param name  字段名
-     * @param value 条件值
-     * @return 当前实例
-     */
-    public TS where(String name, Object value) {
-        return where(name, null, value, null);
-    }
-
-    /**
-     * 设置SQL条件 会自动写成 and name eq 'value' 这样的形式
-     *
-     * @param name  字段名
-     * @param eq    符号，可以写成：“=、&gt;、&gt;=、&lt;、&lt;=、eq、neq、gt、egt、lt、elt”
-     * @param value 值
-     * @return 当前实例
-     */
-    public TS where(String name, String eq, Object value) {
-        return where(name, eq, value, null);
-    }
-
-    /**
-     * 设置SQL条件 会自动写成 and name eq 'value' 这样的形式
-     *
-     * @param name    字段名
-     * @param eq      符号，可以写成：“=、&gt;、&gt;=、&lt;、&lt;=、eq、neq、gt、egt、lt、elt”
-     * @param Value   值
-     * @param connect 连接符默认为：and
-     * @return 当前实例
-     */
-    public TS where(String name, String eq, Object Value, String connect) {
-
-        HashMap list = new HashMap();
-        list.put("name", name);
-        list.put("exp", eq == null ? "=" : eq);
-        list.put("value", Value == null ? "" : Value);
-        list.put("connect", connect == null ? "and" : connect);
-
-        //getOptionArrayList("where").add(new WhereModel(name,eq,Value,connect));
-
-        return (TS)this;
-    }
-
-    /**
-     * 设置SQL条件 会自动写成 and field in(inArray) 这样的形式
-     *
-     * @param field   字段名
-     * @param inArray 字符串得形式
-     * @return 当前实例
-     */
-    public TS whereIn(String field, String inArray) {
-        String[] arr = inArray.split(",");
-        return where(field, "in", arr);
-    }
-
-    /**
-     * 设置SQL条件 会自动写成 and field like inArray 这样的形式
-     *
-     * @param field   字段名
-     * @param inArray 列表对象
-     * @return 当前实例
-     */
-    public TS whereLike(String field, Object inArray) {
-        return where(field, "like", inArray);
-    }
-
-    /**
-     * 设置SQL条件 会自动写成 and field not like inArray 这样的形式
-     *
-     * @param field   字段名
-     * @param inArray 字段值
-     * @return 当前实例
-     */
-    public TS whereLikeNot(String field, Object inArray) {
-        return where(field, "not like", inArray);
-    }
-
-    /**
-     * 设置SQL条件 会自动写成 and field in(inArray1,inArray2) 这样的形式
-     *
-     * @param field   字段名
-     * @param inArray 字段值
-     * @return 当前实例
-     */
-    public TS whereIn(String field, Object inArray) {
-        return where(field, "in", inArray);
-    }
-
-    /**
-     * 设置SQL条件 会自动写成 and field not in(inArray1) 这样的形式
-     *
-     * @param field   字段名
-     * @param inArray 字段值
-     * @return 当前实例
-     */
-    public TS whereInNot(String field, Object inArray) {
-        return where(field, "not in", inArray);
-    }
-
-    /**
-     * 设置SQL条件 会自动写成 and field between inArray 这样的形式
-     *
-     * @param field   字段名
-     * @param inArray 字段值
-     * @return 当前实例
-     */
-    public TS whereBetween(String field, String inArray) {
-        String[] arr = inArray.split(",");
-        return where(field, "between", arr);
-    }
-
-    /**
-     * 设置SQL条件 会自动写成 and field between 'start' and 'end' 这样的形式
-     *
-     * @param field 字段值
-     * @param start 起始值
-     * @param end   结束值
-     * @return 当前实例
-     */
-    public TS whereBetween(String field, String start, String end) {
-        List data = new ArrayList(2);
-        data.add(0, start);
-        data.add(1, end);
-        return where(field, "between", data);
-    }
-
-    /**
-     * 设置SQL条件 会自动写成 and field not between inArray 这样的形式
-     *
-     * @param field   字段名
-     * @param inArray 使用,号隔开得起始和结束值
-     * @return 当前实例
-     */
-    public TS whereBetweenNot(String field, String inArray) {
-        String[] arr = inArray.split(",");
-        return where(field, "not between", arr);
-    }
-
-    /**
-     * 设置SQL条件 会自动写成 and field not between 'start' and 'end' 这样的形式
-     *
-     * @param field 字段名
-     * @param start 起始值
-     * @param end   结束值
-     * @return 当前实例
-     */
-    public TS whereBetweenNot(String field, String start, String end) {
-        List<String> data = new ArrayList(2);
-        data.add(start);
-        data.add(end);
-        return where(field, "not between", data);
     }
 
     /**
@@ -1547,9 +997,10 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
      * @return 获取统计计算后得分页信息
      */
     public Collect<T> page(Collect<T> page) {
-        TS c = null; //new QueryWrapper(getName());
-        try {
+        /*TS c = null;*/ //new QueryWrapper(getName());
+        /*try {
             Class cla = this.getClass();
+            cla.getConstructor(String.class);
             c = (TS) cla.newInstance();
         } catch (InstantiationException e) {
             e.printStackTrace();
@@ -1557,30 +1008,26 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
             return null;
-        }
-
-        c.mOption.putAll(mOption);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            return null;
+        }*/
+        //List currentFields = options.getField();
+        //c.setOptions(options);
         // 总长度
-        long count = c.count();
-        page.setTotalRows(count);
 
+        long count = page.getTotalRows();
+        if(count == 0){
+            count = count();
+            builder.clearBindData();
+            page.setTotalRows(count);
+        }
         this.limit(page.getFirstRow(), page.getPageSize());
         builder.setPage(true);
         List list = select();
-
         builder.setPage(false);
         page.addAll(list);
-
         return page;
-    }
-
-    /**
-     * 获取当前option
-     *
-     * @return 当前设置得信息
-     */
-    public Map getOption() {
-        return mOption;
     }
 
     /**
@@ -1590,14 +1037,11 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
      * @return 列表
      */
     public List<String> column(String field) {
-        if (!mOption.containsKey("field")) {
+        if (!(options.isField())){
             this.field(field);
         }
 
-        QueryMap queryMap = new QueryMap(getName());
-
-        queryMap.mOption.putAll(mOption);
-        List<QMap> list = queryMap.select();
+        List<QMap> list = selectMap();
         List<String> result = new ArrayList();
         for (QMap map : list) {
             result.add(map.getString(field));
@@ -1608,23 +1052,27 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
     /**
      * 根据当前条件获取列数据,健对值的关系
      *
-     * @param field 值
+     * @param field 值 如果带有,逗号则会写入整个个对象
      * @param key   键
-     * @return map 键对值
+     * @return map 键对值 看field 是否带有 , 逗号分隔字段，如果有则是全部否则就是键对值
      */
     public Map column(String field, String key) {
-        if (!mOption.containsKey("field")) {
+        boolean isList = field.indexOf(",") != -1;
+
+        if (!(options.isField())){
             this.field(field);
             this.field(key);
         }
 
-        QueryMap queryMap = new QueryMap(getName());
-        queryMap.mOption.putAll(mOption);
-        List<Map> list = queryMap.select();
+        List<Map> list = selectMap();
         Map result = new LinkedHashMap();
 
         for (Map map : list) {
-            result.put(map.get(key), map.get(field));
+            if(isList){
+                result.put(map.get(key), map);
+            } else {
+                result.put(map.get(key), map.get(field));
+            }
         }
         return result;
     }
@@ -1638,8 +1086,6 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
     public List<String> getCol(String field) {
         return column(field);
     }
-    
-
     /**
      * 根据当前条件获取列数据,健对值的关系
      *
@@ -1651,8 +1097,4 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> {
         return column(field, key);
     }
 
-
-    public void setmOption(Map mOption) {
-        this.mOption = mOption;
-    }
 }

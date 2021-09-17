@@ -19,6 +19,15 @@ public class Convert {
         }
     }
 
+    public static String toStr(Object data)
+    {
+        try {
+            return String.valueOf(data);
+        }catch (Exception e){
+            return "";
+        }
+    }
+
     public static long toLong( Object value )
     {
         try{

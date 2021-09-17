@@ -8,7 +8,6 @@ package com.jntoo.db;
  */
 public class QueryWrapper<T> extends QueryWrapperBase<T,QueryWrapper<T>> {
 
-
     public QueryWrapper() {
         super();
     }

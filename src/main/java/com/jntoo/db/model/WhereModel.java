@@ -18,15 +18,15 @@ public class WhereModel {
         this.raw = true;
     }
 
-    public WhereModel(String field , Object value){
-        this(field , null , value,null);
+    public WhereModel(String name , Object value){
+        this(name , null , value,null);
     }
-    public WhereModel(String field , String exp , Object value)
+    public WhereModel(String name , String exp , Object value)
     {
-        this(field , null , value,null);
+        this(name , null , value,null);
     }
-    public WhereModel(String field , String exp, Object value , String connect){
-        name = field;
+    public WhereModel(String name , String exp, Object value , String connect){
+        this.name = name;
         this.exp = exp == null ? "=" : exp;
         this.value = value;
         this.connect = connect == null ? "and" : connect;

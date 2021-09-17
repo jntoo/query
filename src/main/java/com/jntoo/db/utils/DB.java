@@ -108,6 +108,7 @@ public class DB {
             rs = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             setBindData(rs, bindData);
             id = rs.executeUpdate();
+            log(rs.toString() );
             log(sql, bindData);
         } catch (SQLException e) {
             log(e, sql,bindData);
@@ -138,7 +139,10 @@ public class DB {
             rsKey = rs.getGeneratedKeys();
             rsKey.next();
             id = rsKey.getInt(1);
+
+            log(rs.toString());
             DB.log(sql, bindData);
+
         } catch (SQLException e) {
             DB.log(e, sql,bindData);
         } finally {
@@ -168,6 +172,8 @@ public class DB {
             }
             rs = statement.executeQuery();
             data = fetchEntity(rs, cls);
+
+            log(statement.toString() );
             log(sql , binds);
         } catch (SQLException e) {
             log(e , sql,binds);
@@ -201,7 +207,8 @@ public class DB {
             while ((data = fetchEntity(rs, cls)) != null) {
                 list.add(data);
             }
-            log(sql , binds);
+            log(statement.toString());
+            log(sql, binds);
         } catch (SQLException e) {
             e.printStackTrace();
             log(e , sql,binds);
@@ -320,13 +327,19 @@ public class DB {
         T data = (T) getInstance(tableModel.getEntity());
         try {
             if (rs.next()) {
-                Field[] fields = data.getClass().getDeclaredFields();
-                for (Field field : fields) {
+                List<FieldInfoModel> fields = tableModel.getFieldInfos(); // data.getClass().getDeclaredFields();
+                for (FieldInfoModel infoModel : fields) {
                     try {
-                        FieldInfoModel infoModel = tableModel.fieldInfo.get(field.getName());
+                        Field field = infoModel.getField();
+                        //FieldInfoModel infoModel = tableModel.fieldInfo.get(field.getName());
                         if (infoModel == null) continue;
-                        Object result = infoModel.getGetMethod().invoke(rs, infoModel.getName());
+                        try {
+                            rs.getObject(infoModel.getName());
+                        }catch (SQLException e){
+                            continue;
+                        }
 
+                        Object result = infoModel.getGetMethod().invoke(rs, infoModel.getName());
                         Fields annField = infoModel.getAnnField();
                         Class<?> type = field.getType();
                         Method method = infoModel.getSetMethod();

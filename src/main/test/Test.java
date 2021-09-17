@@ -1,24 +1,23 @@
+import com.alibaba.fastjson.JSON;
 import com.jntoo.db.*;
-import dao.AdminsDao;
+import com.jntoo.db.utils.Collect;
+
 import model.Admins;
 import com.jntoo.db.utils.DB;
-import model.AdminsOne;
-import model.Datas;
+import com.jntoo.db.model.Options;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
+
 import java.util.Date;
 import java.util.List;
 
 public class Test {
-
 
     public static void main(String[] args) {
 
 
         DefaultConnection.setUsername("root");
         DefaultConnection.setPwd("root");
-        DefaultConnection.setDatabase("javamvc08652gxstglxt");
+        DefaultConnection.setDatabase("test");
 
         QueryConfig queryConfig = new QueryConfig();
         queryConfig.setPrefix("");
@@ -26,11 +25,15 @@ public class Test {
         queryConfig.setDebug(true);
         Configuration.setQueryConfig(queryConfig);
 
+        String s = "{\"order\":[\"id desc\"],\"limit\":{\"size\":5},\"where\":[{\"name\":\"a\",\"exp\":\"=\",\"value\":\"c\"}]}";
+        Options d = JSON.parseObject(s , Options.class);
 
         long start = new Date().getTime();
 
-        testSelect();
-        //testInsert();
+        testHasOne();
+        //testHasMany();
+
+        //testSelect();
 
         /*QueryWrapper<Admins> queryWrapper = DB.name(Admins.class);
         List<Admins> data = queryWrapper.where("id" , 1).limit(2).select();
@@ -42,7 +45,6 @@ public class Test {
         DB.name("admins").count();
         AdminsDao adminsDao = new AdminsDao();
         adminsDao.limit(1).select();*/
-
         System.out.println( new Date().getTime() - start );
     }
 
@@ -53,6 +55,13 @@ public class Test {
             System.out.println("true");
         }
     }
+
+    public static void testHasOne()
+    {
+        List list = DB.name(Admins.class).select();
+        System.out.println(list);
+    }
+
 
     public static void testSelect()
     {
@@ -68,7 +77,9 @@ public class Test {
                 .group("id").select();
         System.out.println(data);
 
-        data = DB.name(Admins.class).where("username" , "admin")
+        Collect<Admins> f = new Collect(1,12);
+
+        Collect lists = DB.name(Admins.class).where("username" , "admin")
                 .whereIn("id" , "1,2,3")
                 .whereBetween("addtime" , "2011-01-01","2012-05-05")
                 .whereLike("username" , "%a%")
@@ -76,7 +87,10 @@ public class Test {
                 .whereInNot("id" , "123,2")
                 .where("username" ,"eq" , 2)
                 .limit(5).order("id" , "desc")
-                .group("id").select();
+                .group("id").page(f);
+
+        System.out.println(lists);
+
     }
 
 }

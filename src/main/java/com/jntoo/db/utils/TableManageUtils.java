@@ -2,16 +2,15 @@ package com.jntoo.db.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.jntoo.db.Configuration;
-import com.jntoo.db.annotation.FieldType;
-import com.jntoo.db.annotation.Fields;
-import com.jntoo.db.annotation.Table;
+import com.jntoo.db.annotation.*;
+import com.jntoo.db.callback.HasQueryCallback;
+import com.jntoo.db.has.HasManyQuery;
+import com.jntoo.db.has.HasOneQuery;
+import com.jntoo.db.has.HasQuery;
 import com.jntoo.db.model.FieldInfoModel;
 import com.jntoo.db.model.TableModel;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Blob;
@@ -20,6 +19,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -74,18 +74,24 @@ public class TableManageUtils {
     private static void handlerTableField( TableModel tableModel , Class<?> table)
     {
         Field[] fields = table.getDeclaredFields();
-
         Class<ResultSet> resultSetClass = ResultSet.class;
 
         for (Field field : fields) {
             if((field.getModifiers() & (Modifier.STATIC | Modifier.FINAL)) > 0){
                 continue;
             }
+            String fieldName     = field.getName();
+            if(tableModel.getFieldInfo(fieldName) != null){
+                continue;
+            }
             Fields annotation = field.getAnnotation(Fields.class);
+
+            HasOne hasOne = field.getAnnotation(HasOne.class);
+            HasMany hasMany = field.getAnnotation(HasMany.class);
+
             FieldInfoModel model = new FieldInfoModel();
             Class<? extends FieldInfoModel> modelClass = model.getClass();
 
-            String fieldName     = field.getName();
             String annotName     = annotation != null ? annotation.value() : "";
             String zhenshiName   = StringUtil.isNullOrEmpty(annotName) ? fieldName : annotName;
 
@@ -143,7 +149,7 @@ public class TableManageUtils {
                         // json 数据格式
                         setFieldValue(modelClass.getDeclaredField("getMethod") , model , resultSetClass.getMethod("getString" , String.class));
                     }else{
-                        throw new RuntimeException("没有找到该类型： "+type);
+                        //throw new RuntimeException("没有找到该类型： "+type);
                     }
                 }
             } catch (Exception e) {
@@ -175,7 +181,7 @@ public class TableManageUtils {
                     Method method = table.getMethod("auto"+StringUtil.firstCharUpper(field.getName())+"Insert" , Map.class);
                     setFieldValue(modelClass.getDeclaredField("autoMethodInsert") , model , method);
                     tableModel.autoInserField.add(fieldName);
-                }catch (Exception e){
+                } catch (Exception e) {
                     try {
                         setFieldValue(modelClass.getDeclaredField("autoMethodInsertString") , model , annotation.autoInsert());
                     } catch (IllegalAccessException illegalAccessException) {
@@ -185,19 +191,112 @@ public class TableManageUtils {
                     }
                 }
             }
+
+            if( hasOne != null || hasMany != null)
+            {
+                HasModel hasModel;
+                if(hasOne!=null)
+                {
+                    hasModel = new HasModel(hasOne);
+                }else{
+                    hasModel = new HasModel(hasMany);
+                }
+
+                HasQuery oneQuery = hasModel.hasQuery;
+                if (hasModel.target != void.class)
+                {
+                    oneQuery.setTarget(hasModel.target);
+                }else{
+                    if(List.class.isAssignableFrom(type)){
+                        ParameterizedType parameterizedType = (ParameterizedType)field.getGenericType();
+                        Type[] types = parameterizedType.getActualTypeArguments();
+                        oneQuery.setTarget((Class<?>) types[0]);
+                    }else{
+                        oneQuery.setTarget(type);
+                    }
+                }
+
+                if(StringUtil.isNullOrEmpty(hasModel.foreignKey)){
+                    oneQuery.setForeignKey(tableModel.getPk());
+                }else{
+                    oneQuery.setForeignKey(hasModel.foreignKey);
+                }
+
+                if(StringUtil.isNullOrEmpty(hasModel.localKey))
+                {
+                    oneQuery.setLocalKey("id");
+                }else{
+                    oneQuery.setLocalKey(hasModel.localKey);
+                }
+
+                oneQuery.setField(field.getName());
+                if(hasModel.where.length > 0)
+                {
+                    for (String s : hasModel.where) {
+                        oneQuery.where(s);
+                    }
+                }
+                if(hasModel.order.length > 0)
+                {
+                    for (String s : hasModel.order) {
+                        oneQuery.order(s);
+                    }
+                }
+                if(hasModel.field.length > 0)
+                {
+                    for (String s : hasModel.field) {
+                        oneQuery.field(s);
+                    }
+                }
+                if(hasModel.callback != void.class && HasQueryCallback.class.isAssignableFrom(hasModel.callback))
+                {
+                    try {
+                        Object o = hasModel.callback.newInstance();
+                        Method run = HasQueryCallback.class.getMethod("run", HasQuery.class);
+                        run.invoke(o , oneQuery);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                tableModel.addHasQuery(oneQuery);
+            }
             tableModel.setFieldInfo(fieldName , model);
+        }
+
+        Class<?> superclass = table.getSuperclass();
+        if( superclass != null && superclass != void.class)
+        {
+            handlerTableField(tableModel , superclass);
         }
     }
 
-
     public static void setFieldValue(Field field , Object data , Object value) throws IllegalAccessException
     {
-        boolean isAcc = field.isAccessible();
-        if (!isAcc) field.setAccessible(true);
+        String name = field.getName();
+        try {
+            Method method = data.getClass().getMethod("set"+StringUtil.firstCharUpper(name) , value.getClass());
+            method.invoke(data , value);
+        } catch (Exception e) {
+            boolean isAcc = field.isAccessible();
+            if (!isAcc) field.setAccessible(true);
+            field.set(data,value);
+            if (!isAcc) field.setAccessible(false);
+        }
+    }
 
-        field.set(data,value);
+    public static Object getFieldValue(Field field , Object data ) throws IllegalAccessException
+    {
+        String name = field.getName();
+        Object res = null;
+        try {
+            Method method = data.getClass().getMethod("get"+StringUtil.firstCharUpper(name) );
+            res = method.invoke(data);
+        } catch (Exception e) {
+            field.setAccessible(true);
+            res = field.get(data);
+        }
+        return res;
 
-        if (!isAcc) field.setAccessible(false);
     }
 
 }

@@ -1,5 +1,8 @@
 package com.jntoo.db.model;
 
+import com.jntoo.db.has.*;
+import com.jntoo.db.utils.StringUtil;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,58 +11,120 @@ import java.util.Map;
 
 public class Options {
 
-    private List<WhereModel> wheres;
+    private List<WhereModel> where;
     private List<String> field;
     private List<String> order;
     private List<String> group;
     private List<String> table;
+    private List<String> join;
+    private List<HasQuery> hasQuery;
     private LimitModel limit;
     private String alias;
     private String having;
     private String lock;
-    private String distinct;
+    private boolean distinct;
+    private String force;
 
     public Options()
     {
-        wheres = new ArrayList();
+        where = new ArrayList();
         field = new ArrayList();
         order = new ArrayList();
         group = new ArrayList();
         table = new ArrayList();
+        join = new ArrayList();
+
+    }
+
+    public boolean isTable()
+    {
+        return table.size() > 0;
     }
 
     public void addTable(String table)
     {
         this.table.add(table);
     }
+
+    public boolean isHasQuery()
+    {
+        return hasQuery != null && hasQuery.size() > 0;
+    }
+
+    public void addHasQuery(HasQuery table)
+    {
+        if(!isHasQuery()){
+            hasQuery = new ArrayList();
+        }
+        this.hasQuery.add(table);
+    }
+
+    public boolean isJoin()
+    {
+        return table.size() > 0;
+    }
+
+    public void addJoin(String table)
+    {
+        this.join.add(table);
+    }
+
+    public boolean isWhere()
+    {
+        return where.size() > 0;
+    }
+
     public void addWhere(WhereModel where)
     {
-        wheres.add(where);
+        this.where.add(where);
     }
+
+    public boolean isField()
+    {
+        return field.size() > 0;
+    }
+
     public void addField(String field)
     {
         this.field.add(field);
     }
+
+    public boolean isOrder()
+    {
+        return order.size() > 0;
+    }
+
     public void addOrder(String order)
     {
         this.order.add(order);
     }
+
+    public boolean isGroup()
+    {
+        return group.size() > 0;
+    }
+
     public void addGroup(String group)
     {
         this.group.add(group);
     }
 
-    public void setLimit(Integer size)
+    public boolean isLimit()
+    {
+        return limit != null;
+    }
+
+    public void setLimit(Long size)
     {
         limit = new LimitModel(size);
     }
-    public void setLimit(Integer offset , Integer size)
+    public void setLimit(Long offset , Long size)
     {
         limit = new LimitModel(offset , size);
     }
 
-    public List<WhereModel> getWheres() {
-        return wheres;
+    public List<WhereModel> getWhere() {
+        return where;
     }
 
     public List<String> getField() {
@@ -102,17 +167,12 @@ public class Options {
         this.lock = lock;
     }
 
-    public String getDistinct() {
-        return distinct;
-    }
-    public void setDistinct(String distinct) {
-        this.distinct = distinct;
-    }
+
     public List<String> getTable() {
         return table;
     }
-    public void setWheres(List<WhereModel> wheres) {
-        this.wheres = wheres;
+    public void setWhere(List<WhereModel> where) {
+        this.where = where;
     }
     public void setField(List<String> field) {
         this.field = field;
@@ -130,4 +190,36 @@ public class Options {
         this.limit = limit;
     }
 
+    public List<String> getJoin() {
+        return join;
+    }
+
+    public void setJoin(List<String> join) {
+        this.join = join;
+    }
+
+    public String getForce() {
+        return force;
+    }
+
+    public void setForce(String force) {
+        this.force = force;
+    }
+
+    public boolean isDistinct() {
+        return distinct;
+    }
+
+    public void setDistinct(boolean distinct) {
+        this.distinct = distinct;
+    }
+
+
+    public List<HasQuery> getHasQuery() {
+        return hasQuery;
+    }
+
+    public void setHasQuery(List<HasQuery> hasQuery) {
+        this.hasQuery = hasQuery;
+    }
 }

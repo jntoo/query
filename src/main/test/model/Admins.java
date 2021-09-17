@@ -3,6 +3,7 @@ package model;
 
 import com.jntoo.db.annotation.FieldType;
 import com.jntoo.db.annotation.Fields;
+import com.jntoo.db.annotation.HasOne;
 import com.jntoo.db.annotation.Table;
 import com.jntoo.db.utils.TimerUtils;
 
@@ -30,6 +31,9 @@ public class Admins implements Serializable {
 
     @Fields(type = FieldType.JSON)
     public Datas datas;
+
+    @HasOne(foreignKey = "id")
+    public AdminsOne adminsOne;
 
     public Integer getId() {
         return id;
@@ -73,14 +77,25 @@ public class Admins implements Serializable {
     {
         return "abccccc";
     }
+
+
+    public AdminsOne getAdminsOne() {
+        return adminsOne;
+    }
+
+    public void setAdminsOne(AdminsOne adminsOne) {
+        this.adminsOne = adminsOne;
+    }
+
     @Override
     public String toString() {
         return "Admins{" +
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", pwd='" + pwd + '\'' +
-                ", addtime='" + TimerUtils.date("yyyy-MM-dd HH:mm:ss",addtime) + '\'' +
+                ", addtime=" + addtime +
                 ", datas=" + datas +
+                ", adminsOne=" + adminsOne +
                 '}';
     }
 }

@@ -1,6 +1,7 @@
 package com.jntoo.db.build;
 
 
+import com.jntoo.db.model.LimitModel;
 import com.jntoo.db.utils.*;
 import com.jntoo.db.*;
 import java.sql.Connection;
@@ -37,7 +38,7 @@ public class SqlServer extends Builder{
 
     @Override
     public String parseOrder() {
-        ArrayList list = (ArrayList) getQuery().getOption().get("order");
+        ArrayList list = (ArrayList) getQuery().getOptions().getOrder();
         if(list == null || list.size() == 0){
             return isPage() ? " ORDER BY rand() " : "";
         }else{
@@ -69,12 +70,12 @@ public class SqlServer extends Builder{
 
     @Override
     protected String parseLimit() {
-        Map map = (Map) getQuery().getOption().get("limit");
+        LimitModel map = getQuery().getOptions().getLimit();
         if(map == null){
             return "";
         }
-        String offset = (String) map.get("offset");
-        String limit  = (String) map.get("limit");
+        Long offset = map.getOffset();
+        Long limit  = map.getSize();
         String limitStr = " WHERE ";
         if(!isPage()){
             return "TOP "+limit;
