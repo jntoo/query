@@ -3,7 +3,7 @@ package com.jntoo.db.utils;
 import java.util.*;
 
 
-public class Collect<T> {
+public class Collect<T>{
     /**
      * 总页数
      */
@@ -249,8 +249,4 @@ public class Collect<T> {
     public void setLists(List lists) {
         this.lists = lists;
     }
-
-
-
-
 }

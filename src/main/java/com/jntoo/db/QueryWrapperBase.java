@@ -99,7 +99,6 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> extends Q
     /**
      * 重置并初始化数据
      *
-     * @return 重置数据信息
      */
     @Override
     protected void reset() {
@@ -564,7 +563,7 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> extends Q
                 hasList.add(result);
                 setHasQuery(hasList , options.getHasQuery());
             }
-            if(tableModel.getHasQuery().size() > 0)
+            if(tableModel != null && tableModel.getHasQuery().size() > 0)
             {
                 List<T> hasList = new ArrayList(3);
                 hasList.add(result);
@@ -872,15 +871,17 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> extends Q
         {
             return selectList;
         }
+        if(!(selectList.get(0) instanceof Map)){
+            if( options.isHasQuery() )
+            {
+                setHasQuery(selectList , options.getHasQuery());
+            }
+            if(tableModel != null && tableModel.getHasQuery().size() > 0)
+            {
+                setHasQuery(selectList , tableModel.getHasQuery());
+            }
+        }
 
-        if( options.isHasQuery() )
-        {
-            setHasQuery(selectList , options.getHasQuery());
-        }
-        if(tableModel.getHasQuery().size() > 0)
-        {
-            setHasQuery(selectList , tableModel.getHasQuery());
-        }
 
         return selectList;
     }

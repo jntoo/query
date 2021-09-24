@@ -7,6 +7,8 @@ import com.jntoo.db.utils.DB;
 import com.jntoo.db.model.Options;
 
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +16,11 @@ public class Test {
 
     public static void main(String[] args) {
 
+        try {
+            System.out.println(new File("c:\\upload\\"+"./upload").getCanonicalPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         DefaultConnection.setUsername("root");
         DefaultConnection.setPwd("root");

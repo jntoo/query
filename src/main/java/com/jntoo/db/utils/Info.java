@@ -355,4 +355,50 @@ public class Info {
         }
     }
 
+    public synchronized static String getDateStr()
+    {
+        return date("yyyy-MM-dd HH:mm:ss");
+    }
+
+    /**
+     * 格式化日期
+     * @param format
+     * @return
+     */
+    public static String date(String format) {
+        return date(format, null);
+    }
+
+    /**
+     * 根据时间戳格式化日期
+     * @param format
+     * @param time  时间戳 秒
+     * @return
+     */
+    public static String date(String format, long time) {
+        return date(format, new Date(time * 1000));
+    }
+
+    /**
+     * 获取当前时间戳
+     * @return
+     */
+    public static long time() {
+        return Long.valueOf(new Date().getTime() / 1000);
+    }
+
+    /**
+     * 根据date 类型格式化日期
+     * @param format
+     * @param time
+     * @return
+     */
+    public static String date(String format, Date time) {
+        if (time == null) {
+            time = new Date();
+        }
+        java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat(format);
+        return formatter.format(time);
+    }
+
 }
