@@ -1,16 +1,14 @@
-package com.jntoo.db.utils;
+package com.jntoo.db;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
-import com.jntoo.db.Configuration;
-import com.jntoo.db.ConnectionConfig;
-import com.jntoo.db.QueryMap;
-import com.jntoo.db.QueryWrapper;
 import com.jntoo.db.annotation.FieldType;
 import com.jntoo.db.annotation.Fields;
 import com.jntoo.db.model.FieldInfoModel;
 import com.jntoo.db.model.QMap;
 import com.jntoo.db.model.TableModel;
+import com.jntoo.db.utils.StringUtil;
+import com.jntoo.db.utils.TableManageUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

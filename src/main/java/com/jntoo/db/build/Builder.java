@@ -4,7 +4,7 @@ import com.jntoo.db.Configuration;
 import com.jntoo.db.QueryWrapperBase;
 import com.jntoo.db.model.LimitModel;
 import com.jntoo.db.model.WhereModel;
-import com.jntoo.db.utils.DB;
+import com.jntoo.db.DB;
 import com.jntoo.db.utils.StringUtil;
 
 import java.sql.*;

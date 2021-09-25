@@ -1,9 +1,9 @@
 import com.alibaba.fastjson.JSON;
 import com.jntoo.db.*;
-import com.jntoo.db.utils.Collect;
+import com.jntoo.db.utils.CollectUtil;
 
 import model.Admins;
-import com.jntoo.db.utils.DB;
+import com.jntoo.db.DB;
 import com.jntoo.db.model.Options;
 
 
@@ -84,9 +84,9 @@ public class Test {
                 .group("id").select();
         System.out.println(data);
 
-        Collect<Admins> f = new Collect(1,12);
+        CollectUtil<Admins> f = new CollectUtil(1,12);
 
-        Collect lists = DB.name(Admins.class).where("username" , "admin")
+        CollectUtil lists = DB.name(Admins.class).where("username" , "admin")
                 .whereIn("id" , "1,2,3")
                 .whereBetween("addtime" , "2011-01-01","2012-05-05")
                 .whereLike("username" , "%a%")

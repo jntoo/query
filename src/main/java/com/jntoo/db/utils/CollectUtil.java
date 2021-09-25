@@ -3,7 +3,7 @@ package com.jntoo.db.utils;
 import java.util.*;
 
 
-public class Collect<T>{
+public class CollectUtil<T>{
     /**
      * 总页数
      */
@@ -33,16 +33,16 @@ public class Collect<T>{
      */
     private List<T> lists = new ArrayList();
 
-    public Collect() {
+    public CollectUtil() {
     }
 
-    public Collect(long currentPage, long pageSize) {
+    public CollectUtil(long currentPage, long pageSize) {
         this.currentPage = currentPage;
         this.pageSize = pageSize;
         calcFirstRow();
     }
 
-    public Collect(long currentPage, long totalRows , long pageSize) {
+    public CollectUtil(long currentPage, long totalRows , long pageSize) {
         this.totalRows = totalRows;
         this.currentPage = currentPage < 1 ? 1 : currentPage;
         this.pageSize = pageSize;

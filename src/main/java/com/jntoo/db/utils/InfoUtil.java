@@ -3,7 +3,7 @@ package com.jntoo.db.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.jntoo.db.QueryMap;
+import com.jntoo.db.DB;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Info {
+public class InfoUtil {
     /**
      * 获取json 数据中的address 字段
      * @param addre JSON 结构得字符串

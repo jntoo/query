@@ -4,14 +4,12 @@ package com.jntoo.db;
 import com.alibaba.fastjson.JSON;
 import com.jntoo.db.annotation.FieldType;
 import com.jntoo.db.annotation.Fields;
-import com.jntoo.db.annotation.HasOne;
 import com.jntoo.db.build.Builder;
 import com.jntoo.db.has.HasManyQuery;
 import com.jntoo.db.has.HasOneQuery;
 import com.jntoo.db.has.HasQuery;
 import com.jntoo.db.model.*;
 import com.jntoo.db.utils.*;
-import sun.dc.pr.PRError;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -997,7 +995,7 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> extends Q
      * @param page 分页信息
      * @return 获取统计计算后得分页信息
      */
-    public Collect<T> page(Collect<T> page) {
+    public CollectUtil<T> page(CollectUtil<T> page) {
         /*TS c = null;*/ //new QueryWrapper(getName());
         /*try {
             Class cla = this.getClass();
