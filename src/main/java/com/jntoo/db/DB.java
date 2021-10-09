@@ -101,7 +101,7 @@ public class DB {
     public static int executeUpdate(String sql, Object... bindData) {
         PreparedStatement rs = null;
         int id = -1;
-        Connection conn = Configuration.getConnectionConfig().getConn();
+        Connection conn = Configuration.getConnection();
         try {
             rs = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             setBindData(rs, bindData);
@@ -112,10 +112,19 @@ public class DB {
             log(e, sql,bindData);
         } finally {
             DB.release(rs, null);
-            Configuration.getConnectionConfig().closeConn(conn);
+            Configuration.closeConnection(conn);
         }
         return id;
     }
+
+    /*public static void closeConn(Connection connection)
+    {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }*/
 
     /**
      * 执行插入语句
@@ -128,7 +137,7 @@ public class DB {
         PreparedStatement rs = null;
         ResultSet rsKey = null;
         int id = -1;
-        Connection conn = Configuration.getConnectionConfig().getConn();
+        Connection conn = Configuration.getConnection();
         try {
 
             rs = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -145,7 +154,7 @@ public class DB {
             DB.log(e, sql,bindData);
         } finally {
             DB.release(rs, rsKey);
-            Configuration.getConnectionConfig().closeConn(conn);
+            Configuration.closeConnection(conn);
         }
         return id;
     }
@@ -159,7 +168,7 @@ public class DB {
      * @return 实体值
      */
     public static<T> T find(String sql, Class<T> cls, Object... binds) {
-        Connection conn = Configuration.getConnectionConfig().getConn();
+        Connection conn = Configuration.getConnection();
         T data = null;
         PreparedStatement statement = null;
         ResultSet rs = null;
@@ -178,7 +187,7 @@ public class DB {
             e.printStackTrace();
         } finally {
             release(statement , rs);
-            Configuration.getConnectionConfig().closeConn(conn);
+            Configuration.closeConnection(conn);
         }
         return data;
     }
@@ -191,7 +200,7 @@ public class DB {
      * @return 实体类得列表
      */
     public static<T> List select(String sql, Class<T> cls, Object... binds) {
-        Connection conn = Configuration.getConnectionConfig().getConn();
+        Connection conn = Configuration.getConnection();
         List list = new ArrayList();
         PreparedStatement statement = null;
         ResultSet rs = null;
@@ -212,7 +221,7 @@ public class DB {
             log(e , sql,binds);
         } finally {
             release(statement , rs);
-            Configuration.getConnectionConfig().closeConn(conn);
+            Configuration.closeConnection(conn);
         }
         return list;
     }
@@ -245,7 +254,7 @@ public class DB {
             if(data.length > 0){
                 List datas = new ArrayList();
                 for (int i = 0; i < data.length; i++) {
-                    System.out.print("---?"+i+"="+data[i]);
+                    System.out.print(String.format("(%s) %s ",data.getClass().getSimpleName() , String.valueOf(data[i])));
                 }
                 System.out.println("");
             }
@@ -307,8 +316,6 @@ public class DB {
         }
         System.err.println(errorMessage);
     }
-
-
 
     public static <T> T fetchEntity(ResultSet rs, Class<T> table) throws SQLException {
         if (Map.class.isAssignableFrom(table)) {

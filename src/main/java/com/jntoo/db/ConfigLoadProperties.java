@@ -12,33 +12,53 @@ import java.security.AccessControlException;
 import java.util.Properties;
 
 public class ConfigLoadProperties {
-
+    private static final String propertiesFile = "jntoodb.properties";
     static protected void init()
     {
-        String t4jProps = "jntoodb.properties";
-        init(t4jProps);
+        init(propertiesFile);
+    }
+
+    static public void loadJarResource()
+    {
+        init();
+    }
+
+    static public void loadJarResource(String filename)
+    {
+        init(filename);
     }
 
     static public void init(String filename) {
         //初始化默认配置
-        Properties defaultProperty = new Properties();
-        defaultProperty.setProperty("jntoo.db.debug", "true");
-        defaultProperty.setProperty("jntoo.db.connection", "");
-        //defaultProperty.setProperty("jntoo.db.connection", "com.jntoo.db.DefaultConnection");
-        defaultProperty.setProperty("jntoo.db.prefix", "");
-        defaultProperty.setProperty("jntoo.db.builder-class", "");
 
+        Properties defaultProperty = getDefaultProperties();
         //读取自定义配置
-        String t4jProps = filename;
-        boolean loaded = loadProperties(defaultProperty, "." + File.separatorChar + t4jProps)
-                || loadProperties(defaultProperty, ConfigLoadProperties.class.getResourceAsStream("/WEB-INF/" + t4jProps))
-                || loadProperties(defaultProperty, ConfigLoadProperties.class.getClassLoader().getResourceAsStream(t4jProps));
+
+        boolean loaded = loadProperties(defaultProperty, "." + File.separatorChar + filename)
+                || loadProperties(defaultProperty, ConfigLoadProperties.class.getResourceAsStream("/WEB-INF/" + filename))
+                || loadProperties(defaultProperty, ConfigLoadProperties.class.getClassLoader().getResourceAsStream(filename));
         if (!loaded) {
             //System.out.println("没有加载到"+t4jProps+"属性文件!");
         }
         setConfig(defaultProperty);
     }
-    
+
+
+    static public boolean loadfile(String filepath) {
+        //初始化默认配置
+        Properties defaultProperty = getDefaultProperties();
+
+        //读取自定义配置
+        boolean loaded = loadProperties(defaultProperty, filepath);
+        if (!loaded) {
+            //System.out.println("没有加载到"+t4jProps+"属性文件!");
+            return false;
+        }
+        setConfig(defaultProperty);
+        return true;
+    }
+
+
 
     static public void setConfig(Properties defaultProperty)
     {
@@ -49,6 +69,7 @@ public class ConfigLoadProperties {
         if(config instanceof ConnectionConfig){
             queryConfig.setConnectionConfig((ConnectionConfig) config);
         }
+
         queryConfig.setPrefix(getProperty(defaultProperty,"jntoo.db.prefix"));
         String builderString = getProperty(defaultProperty,"jntoo.db.builder-class");
         if(!StringUtil.isNullOrEmpty(builderString)){
@@ -128,6 +149,18 @@ public class ConfigLoadProperties {
         } catch (NumberFormatException nfe) {
             return -1;
         }
+    }
+
+    static private Properties getDefaultProperties()
+    {
+        Properties defaultProperty = new Properties();
+        defaultProperty.setProperty("jntoo.db.debug", "true");
+        defaultProperty.setProperty("jntoo.db.connection", "");
+        defaultProperty.setProperty("jntoo.db.datasource", "");
+        //defaultProperty.setProperty("jntoo.db.connection", "com.jntoo.db.DefaultConnection");
+        defaultProperty.setProperty("jntoo.db.prefix", "");
+        defaultProperty.setProperty("jntoo.db.builder-class", "");
+        return defaultProperty;
     }
 
     /**

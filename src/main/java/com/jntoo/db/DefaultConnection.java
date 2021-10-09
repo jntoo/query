@@ -31,7 +31,7 @@ public class DefaultConnection implements ConnectionConfig {
 
     @Override
     public void closeConn(Connection connection) {
-        System.out.println("关闭链接");
+
     }
 
     public static String getConnectString() {

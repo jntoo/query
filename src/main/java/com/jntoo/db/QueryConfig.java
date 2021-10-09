@@ -2,6 +2,8 @@ package com.jntoo.db;
 
 import com.jntoo.db.build.Builder;
 
+import javax.sql.DataSource;
+
 public class QueryConfig {
     /**
      * 调试输出
@@ -12,15 +14,14 @@ public class QueryConfig {
      * 获取链接信息
      */
     private ConnectionConfig connectionConfig;
+    private DataSource dataSource;
 
     /**
      * 表前缀
      */
     private String prefix;
 
-
     private Class<? extends Builder> builder;
-
 
     public boolean isDebug() {
         return isDebug;
@@ -29,6 +30,7 @@ public class QueryConfig {
     public void setDebug(boolean debug) {
         isDebug = debug;
     }
+
 
     public ConnectionConfig getConnectionConfig() {
         return connectionConfig;
@@ -52,5 +54,13 @@ public class QueryConfig {
 
     public void setBuilder(Class<? extends Builder> builder) {
         this.builder = builder;
+    }
+
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 }

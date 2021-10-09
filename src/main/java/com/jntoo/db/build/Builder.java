@@ -269,7 +269,7 @@ public class Builder {
         Statement st = null;
         ResultSet rs = null;
         try {
-            connection = Configuration.getConnectionConfig().getConn();
+            connection = Configuration.getConnection();
             st = connection.createStatement();
             rs = st.executeQuery(getTableFind(parseTable()));
             ResultSetMetaData rsmd = rs.getMetaData();
@@ -313,7 +313,7 @@ public class Builder {
         }finally {
             DB.release(st , rs);
             if(connection != null){
-                Configuration.getConnectionConfig().closeConn(connection);
+                Configuration.closeConnection(connection);
             }
         }
         return result;
@@ -601,7 +601,7 @@ public class Builder {
         List inArrayList = new ArrayList();
         if(val.getClass().isArray()){
             if(val instanceof String[]){
-                Arrays.asList((String[]) val);
+                return Arrays.asList((String[]) val);
             }else{
                 return Arrays.asList((Object[]) val);
             }
