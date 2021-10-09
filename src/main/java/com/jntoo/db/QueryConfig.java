@@ -8,20 +8,20 @@ public class QueryConfig {
     /**
      * 调试输出
      */
-    private boolean isDebug;
+    private boolean isDebug = false;
 
     /**
      * 获取链接信息
      */
-    private ConnectionConfig connectionConfig;
-    private DataSource dataSource;
+    private ConnectionConfig connectionConfig = null;
+    private DataSource dataSource = null;
 
     /**
      * 表前缀
      */
-    private String prefix;
+    private String prefix = "";
 
-    private Class<? extends Builder> builder;
+    private Class<? extends Builder> builder = null;
 
     public boolean isDebug() {
         return isDebug;
@@ -31,6 +31,10 @@ public class QueryConfig {
         isDebug = debug;
     }
 
+    public void beanInit()
+    {
+        Configuration.setQueryConfig(this);
+    }
 
     public ConnectionConfig getConnectionConfig() {
         return connectionConfig;
