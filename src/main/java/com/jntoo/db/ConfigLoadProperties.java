@@ -39,6 +39,7 @@ public class ConfigLoadProperties {
                 || loadProperties(defaultProperty, ConfigLoadProperties.class.getClassLoader().getResourceAsStream(filename));
         if (!loaded) {
             //System.out.println("没有加载到"+t4jProps+"属性文件!");
+            return;
         }
         setConfig(defaultProperty);
     }

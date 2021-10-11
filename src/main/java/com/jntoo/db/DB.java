@@ -214,6 +214,7 @@ public class DB {
             while ((data = fetchEntity(rs, cls)) != null) {
                 list.add(data);
             }
+
             log(statement.toString());
             log(sql, binds);
         } catch (SQLException e) {

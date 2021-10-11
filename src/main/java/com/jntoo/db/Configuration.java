@@ -4,15 +4,13 @@ import com.jntoo.db.build.Builder;
 import com.jntoo.db.build.Mysql;
 import com.jntoo.db.build.SqlServer;
 import com.jntoo.db.utils.AssertUtils;
+import javafx.application.Application;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 
-/**
- * @author weixin4j
- */
 public class Configuration {
     private static QueryConfig queryConfig = null;
 
@@ -22,6 +20,7 @@ public class Configuration {
         }
     }
 
+    @Deprecated
     static public ConnectionConfig getConnectionConfig()
     {
         return queryConfig.getConnectionConfig();
@@ -94,6 +93,11 @@ public class Configuration {
     }
 
     public static synchronized void setQueryConfig(QueryConfig queryConfig) {
+        if(Configuration.queryConfig != null)
+        {
+            System.out.println("[WARE] Set up many times QueryConfig class");
+        }
+
         if(queryConfig.getBuilder() == null && queryConfig.getDataSource() != null ){
             Connection conn = null;
             try {
@@ -131,9 +135,7 @@ public class Configuration {
             aClass = SqlServer.class;
         }
         queryConfig.setBuilder(aClass);
-        DB.log(String.format("auto binding builder %s " , aClass));
-
-
+        System.out.println(String.format("[Info] auto binding builder %s " , aClass));
     }
 
 

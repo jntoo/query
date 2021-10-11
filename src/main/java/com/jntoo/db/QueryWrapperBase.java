@@ -101,10 +101,11 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> extends Q
     @Override
     protected void reset() {
         super.reset();
-        ConnectionConfig connectionConfig = Configuration.getConnectionConfig();
+        /*ConnectionConfig connectionConfig = Configuration.getConnectionConfig();
         if (connectionConfig == null) {
             throw new RuntimeException("not ConnectionConfig");
-        }
+        }*/
+        AssertUtils.isNull(Configuration.getQueryConfig() , "not set QueryConfig");
         model = null;
         mName = "";
         //mOption = null;
