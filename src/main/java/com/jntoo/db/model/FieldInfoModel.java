@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 
 public class FieldInfoModel {
     private String name;
-
+    private Class<?> classPojo;
     private Field field;
     private Fields annField;
 
@@ -26,6 +26,7 @@ public class FieldInfoModel {
     public void setName(String name) {
         this.name = name;
     }
+
 
     public Field getField() {
         return field;
@@ -91,6 +92,13 @@ public class FieldInfoModel {
         this.autoMethodInsertString = autoMethodInsertString;
     }
 
+    public Class<?> getClassPojo() {
+        return classPojo;
+    }
+
+    public void setClassPojo(Class<?> classPojo) {
+        this.classPojo = classPojo;
+    }
 
     /*public String getName() {
         return name;

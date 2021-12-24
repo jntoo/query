@@ -218,8 +218,8 @@ public class DB {
             log(statement.toString());
             log(sql, binds);
         } catch (SQLException e) {
-            e.printStackTrace();
             log(e , sql,binds);
+            e.printStackTrace();
         } finally {
             release(statement , rs);
             Configuration.closeConnection(conn);
@@ -255,7 +255,7 @@ public class DB {
             if(data.length > 0){
                 List datas = new ArrayList();
                 for (int i = 0; i < data.length; i++) {
-                    System.out.print(String.format("(%s) %s ",data.getClass().getSimpleName() , String.valueOf(data[i])));
+                    System.out.print(String.format("(%s) %s ",data[i].getClass().getSimpleName() , String.valueOf(data[i])));
                 }
                 System.out.println("");
             }
@@ -323,14 +323,14 @@ public class DB {
             return (T)fetchMap(rs);
         }
         TableModel model = TableManageUtils.getTable(table);
-        return fetchEntity(rs, model);
+        return (T)fetchEntity(rs, model);
     }
 
-    public static <T> T fetchEntity(ResultSet rs, TableModel tableModel) throws SQLException {
+    public static Object fetchEntity(ResultSet rs, TableModel tableModel) throws SQLException {
         if (rs == null) {
             return null;
         }
-        T data = (T) getInstance(tableModel.getEntity());
+        Object data =  getInstance(tableModel.getEntity());
         try {
             if (rs.next()) {
                 List<FieldInfoModel> fields = tableModel.getFieldInfos(); // data.getClass().getDeclaredFields();
@@ -401,10 +401,10 @@ public class DB {
         }
     }
 
-    protected static <T> T getInstance(Class<T> superClass) {
+    protected static Object getInstance(Class superClass) {
         try {
             if (Map.class.isAssignableFrom(superClass)) {
-                return (T) new QMap();
+                return new QMap();
             } else {
                 return superClass.newInstance();
             }
@@ -413,9 +413,6 @@ public class DB {
             throw new RuntimeException(e);
         }
     }
-
-
-
 
     private static void setBindData(PreparedStatement statement, Object[] bindData) throws SQLException {
         int index = 1;

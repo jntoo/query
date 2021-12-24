@@ -2,6 +2,7 @@ import com.alibaba.fastjson.JSON;
 import com.jntoo.db.*;
 import com.jntoo.db.utils.CollectUtil;
 
+import model.AdminTotal;
 import model.Admins;
 import com.jntoo.db.DB;
 import com.jntoo.db.model.Options;
@@ -65,7 +66,7 @@ public class Test {
 
     public static void testHasOne()
     {
-        List list = DB.name(Admins.class).select();
+        List list = DB.name(AdminTotal.class).select();
         System.out.println(list);
     }
 

@@ -4,7 +4,7 @@ import com.jntoo.db.build.Builder;
 import com.jntoo.db.build.Mysql;
 import com.jntoo.db.build.SqlServer;
 import com.jntoo.db.utils.AssertUtils;
-import javafx.application.Application;
+//import javafx.application.Application;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

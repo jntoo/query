@@ -549,8 +549,8 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> extends Q
     public T find() {
         //limit(1);
         String sql = builder.buildSelect();
-
-        T result = (T)DB.find(sql , model != null ? model.getClass() : Map.class , builder.getBindData().toArray());
+        Class<?> aclass = model != null ? model.getClass() : Map.class;
+        T result = (T)DB.find(sql , aclass , builder.getBindData().toArray());
         if(result == null){
             return null;
         }
@@ -569,9 +569,9 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> extends Q
                 setHasQuery(hasList , tableModel.getHasQuery());
             }
         }
-
         return result;
     }
+
 
     protected void setHasQuery( List<T> list , List<HasQuery> queryList )
     {
@@ -690,7 +690,7 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> extends Q
         options.addField(field);
         Map data = findMap();
         options.setField(source);
-        if (data.containsKey("count")) {
+        if (data != null && data.containsKey("count")) {
             String count = data.get("count").toString();
             return Double.valueOf(count).doubleValue();
         }
@@ -862,10 +862,10 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> extends Q
         if (model != null) {
             where(model);
         }
-
+        builder.clearBindData();
         String sql = builder.buildSelect();
-
-        List selectList = DB.select(sql , model != null ? model.getClass() : Map.class , builder.getBindData().toArray());
+        Class<?> aclass = model != null ? model.getClass() : Map.class;
+        List selectList = DB.select(sql , aclass , builder.getBindData().toArray());
         if(selectList.size() == 0)
         {
             return selectList;
@@ -962,7 +962,7 @@ abstract public class QueryWrapperBase<T ,TS extends QueryWrapperBase> extends Q
             field(name);
         }
         Map data = findMap();
-        if (data.isEmpty()) {
+        if (data == null || data.isEmpty()) {
             return "";
         }
         return String.valueOf(data.get(name));

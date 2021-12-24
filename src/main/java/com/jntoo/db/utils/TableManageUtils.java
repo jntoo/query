@@ -112,9 +112,11 @@ public class TableManageUtils {
 
             Class<?> type = field.getType();
             try {
+                model.setClassPojo(table);
                 setFieldValue(modelClass.getDeclaredField("name") , model , zhenshiName);
                 setFieldValue(modelClass.getDeclaredField("field") , model , field);
                 setFieldValue(modelClass.getDeclaredField("annField") , model , annotation);
+
                 Method method = table.getMethod("set" + StringUtil.firstCharUpper(fieldName), type);
 
                 setFieldValue(modelClass.getDeclaredField("setMethod") , model , method);
@@ -242,12 +244,14 @@ public class TableManageUtils {
                         oneQuery.order(s);
                     }
                 }
+
                 if(hasModel.field.length > 0)
                 {
                     for (String s : hasModel.field) {
                         oneQuery.field(s);
                     }
                 }
+
                 if(hasModel.callback != void.class && HasQueryCallback.class.isAssignableFrom(hasModel.callback))
                 {
                     try {

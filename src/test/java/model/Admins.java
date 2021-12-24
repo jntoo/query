@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  *  管理员模块的实体类
  */
-@Table
+@Table("admins")
 public class Admins implements Serializable {
 
     public static final long serialVersionUID = 1L;
@@ -98,4 +98,7 @@ public class Admins implements Serializable {
                 ", adminsOne=" + adminsOne +
                 '}';
     }
+
+
+
 }
