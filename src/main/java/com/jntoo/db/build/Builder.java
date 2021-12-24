@@ -582,12 +582,25 @@ public class Builder {
                 buffer.append( "?" ).append(" AND ").append( "?" );
             }
         }else{
-            buffer.append(" "+key);
-            buffer.append(" "+exp+" ");
-            bindData(val);
+            if(val == null){
+                if(exp.equals("=")){
+                    buffer.append(" ").append(key).append(" is null ");
+                }else if(exp.equals("!=")){
+                    buffer.append(" ").append(key).append(" is not null ");
+                }else{
+                    buffer.append(" ").append(key).append(" ").append(exp).append("'null'");
+                }
+
+            }else{
+                buffer.append(" "+key);
+                buffer.append(" "+exp+" ");
+                bindData(val);
+                buffer.append("?");
+                buffer.append(" ");
+            }
+
             //buffer.append(formatString(String.valueOf( val)));
-            buffer.append("?");
-            buffer.append(" ");
+
         }
     }
 
